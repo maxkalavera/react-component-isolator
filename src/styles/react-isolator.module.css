@@ -1,4 +1,13 @@
 
 .react-isolator {
-  background-color: wheat;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: var(--gap-md);
+  background-color: var(--white);
+}
+
+.react-isolator__content {
+  opacity: 1.0;
 }
