@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 
 import { ReactIsolatorContextProvider, useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
-import ComponentsList from 'src/components/ComponentsList';
+import Visualizer from 'src/components/Visualizer';
+import ComponentsMenu from 'src/components/ComponentsMenu';
 import Header from 'src/components/Header';
 import globalStyles from 'src/styles/globals.module.css';
 import styles from 'src/styles/react-isolator.module.css';
@@ -27,21 +28,12 @@ function ReactIsolator({
 
       <Header />
       <div className={styles['react-isolator__content']}>
-        <ComponentsList />
+        <ComponentsMenu />
+        <Visualizer />
       </div>
     </div>
   );
 }
-
-/*
-      <h1>This is a header</h1>
-      { items.map((item, index) => (
-        <div key={index}>
-          <h4>{ item.name }</h4>
-          { item.element }
-        </div>
-      )) }
-*/
 
 function ReactIsolatorWrapper({
   children=[]

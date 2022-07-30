@@ -4,7 +4,6 @@ import commonjs from 'rollup-plugin-commonjs';
 import filesize from 'rollup-plugin-filesize';
 import typescript from 'rollup-plugin-typescript2';
 import autoprefixer from 'autoprefixer';
-//import postcss from 'rollup-plugin-postcss-modules';
 import postcss from 'rollup-plugin-postcss';
 import { terser } from 'rollup-plugin-terser';
 import { cleandir } from "rollup-plugin-cleandir";
@@ -33,7 +32,6 @@ export default {
     commonjs(),
 		postcss({
       plugins: [autoprefixer()],
-      writeDefinitions: true,
       sourceMap: true,
       minimize: true,
       modules: true

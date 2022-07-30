@@ -1,8 +1,0 @@
-.components-list {
-  width: 191px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: var(--gap-md);
-  gap: var(--gap-md);
-}

@@ -3,13 +3,17 @@ import React, { useContext, useState } from 'react';
 import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
 
 export interface ReactIsolatorContext {
+  selected: IsolatedItem | null,
   items: IsolatedItem[]
+  setSelected: (item: IsolatedItem) => void
   addItem: (item: IsolatedItem) => void
   clearItems: () => void
 };
 
 const defaultState: ReactIsolatorContext = {
+  selected: null,
   items: [],
+  setSelected: (item: IsolatedItem) => {},
   addItem: (item: IsolatedItem) => {},
   clearItems: () => {}
 };
@@ -25,12 +29,22 @@ function ReactIsolatorContextProvider({
 }: {
   children?: JSX.Element[] | JSX.Element
 }): JSX.Element {
-  const [{ items }, setReactIsolatorContext] = useState<ReactIsolatorContext>(defaultState);
+  const [{ selected, items }, setReactIsolatorContext] = useState<ReactIsolatorContext>(defaultState);
+
+  const setSelected = (item: IsolatedItem) => {
+    setReactIsolatorContext((prevState) => {
+      return {
+        ...prevState,
+        selected: item
+      };
+    });
+  }
 
   const addItem = (item: IsolatedItem) => {
     setReactIsolatorContext((prevState) => {
       return {
         ...prevState,
+        selected: prevState.items.length === 0 ? item : prevState.selected,
         items: [...prevState.items, item],
       };
     });
@@ -47,7 +61,9 @@ function ReactIsolatorContextProvider({
 
   return (
     <ReactIsolatorContext.Provider value={{
+      selected,
       items,
+      setSelected,
       addItem,
       clearItems
     }}>
