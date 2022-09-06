@@ -1,0 +1,24 @@
+
+.switch-button {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  color: var(--gray-400);
+  border: 1px solid var(--gray-400);
+  outline: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: var(--white);
+}
+
+.switch-button--on {
+  color: var(--gray-600);
+  border: 1px solid var(--gray-600);
+  outline: 1px solid var(--gray-600);
+  box-shadow: none;
+}

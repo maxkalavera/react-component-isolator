@@ -1,23 +1,22 @@
 
 .react-isolator {
-  width: 100%;
-  height: 95vh;
-  max-width: 100vw;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   padding: 0px;
-  gap: var(--gap-md);
   background-color: var(--white);
+  overflow: hidden;
 }
 
 .react-isolator__content {
-  box-sizing: border-box;
-  width: 100%;
   height: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: stretch;
   gap: var(--gap-md);
-  padding: 0px var(--gap-md);
+  padding: var(--gap-md);
+  overflow: hidden;
 }

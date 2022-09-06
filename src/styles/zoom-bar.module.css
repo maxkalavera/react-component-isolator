@@ -1,0 +1,61 @@
+
+.zoom-bar {
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px;
+  z-index: 9;
+}
+
+.zoom-bar__increase-button {
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--gray-500);
+  background-color: var(--white);
+  border: 1px solid var(--gray-500);
+  border-radius: var(--gap-sm) var(--gap-sm) 0px 0px;
+  cursor: pointer;
+}
+
+.zoom-bar__increase-button:hover {
+  color: var(--gray-900);
+  border: 1px solid var(--gray-900);
+  box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.25) inset;
+}
+
+.zoom-bar__increase-button:active {
+  box-shadow: 0px 0px 3px 2px rgba(0, 0, 0, 0.25) inset;
+}
+
+.zoom-bar__decrease-button {
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--gray-500);
+  background-color: var(--white);
+  border: 1px solid var(--gray-500);
+  border-radius: 0px 0px var(--gap-sm) var(--gap-sm);
+  cursor: pointer;
+}
+
+.zoom-bar__decrease-button:hover {
+  color: var(--gray-900);
+  border: 1px solid var(--gray-900);
+  box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.25) inset;
+}
+
+.zoom-bar__decrease-button:active {
+  box-shadow: 0px 0px 3px 2px rgba(0, 0, 0, 0.25) inset;
+}
