@@ -51,8 +51,6 @@
 .visualizer__item {
   width: fit-content;
   height: fit-content;
-  padding: var(--gap-sm);
-  box-sizing: border-box;
   user-select: none;
   border: 2px dashed var(--gray-400);
   border-radius: 6px;

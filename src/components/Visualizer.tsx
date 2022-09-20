@@ -1,6 +1,5 @@
 import React, { MouseEventHandler, useEffect, useRef, useState } from 'react';
 
-import Ruler from 'src/wrappers/Ruler';
 import BackgroundGrid from 'src/components/BackgroundGrid';
 import { ZOOM_FRACTIONS } from 'src/utils/constants';
 import Grid from 'src/components/icons/Grid';
@@ -157,7 +156,7 @@ function Visualizer() {
           >
             
             { selected 
-                ? <Ruler>{ selected.element }</Ruler> 
+                ? selected.element 
                 : null 
             }
           </div>
