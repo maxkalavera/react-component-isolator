@@ -6,7 +6,9 @@ export interface ReactIsolatorContext {
   selected: IsolatedItem | null
   items: IsolatedItem[]
   searchTerm: string
+  selectedPosition: [number, number] | null
   setSelected: (item: IsolatedItem) => void
+  setSelectedPosition: (position: [number, number]) => void
   addItem: (item: IsolatedItem) => void
   clearItems: () => void
   setSearchTerm: (item: string) => void
@@ -16,7 +18,9 @@ const defaultState: ReactIsolatorContext = {
   selected: null,
   items: [],
   searchTerm: '',
+  selectedPosition: null,
   setSelected: (item: IsolatedItem) => {},
+  setSelectedPosition: (position: [number, number]) => {},
   addItem: (item: IsolatedItem) => {},
   clearItems: () => {},
   setSearchTerm: (value: string) => {},
@@ -33,13 +37,27 @@ function ReactIsolatorContextProvider({
 }: {
   children?: JSX.Element[] | JSX.Element
 }): JSX.Element {
-  const [{ selected, items, searchTerm }, setReactIsolatorContext] = useState<ReactIsolatorContext>(defaultState);
+  const [{ 
+    selected, 
+    items, 
+    searchTerm, 
+    selectedPosition 
+  }, setReactIsolatorContext] = useState<ReactIsolatorContext>(defaultState);
 
   const setSelected = (item: IsolatedItem) => {
     setReactIsolatorContext((prevState) => {
       return {
         ...prevState,
         selected: item
+      };
+    });
+  }
+
+  const setSelectedPosition = (position: [number, number]) => {
+    setReactIsolatorContext((prevState) => {
+      return {
+        ...prevState,
+        selectedPosition: position,
       };
     });
   }
@@ -77,7 +95,9 @@ function ReactIsolatorContextProvider({
       selected,
       items,
       searchTerm,
+      selectedPosition,
       setSelected,
+      setSelectedPosition,
       addItem,
       clearItems,
       setSearchTerm,

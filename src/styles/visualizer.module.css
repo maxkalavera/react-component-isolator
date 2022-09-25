@@ -61,6 +61,7 @@
   justify-content: center;
   align-items: flex-start;
   gap: var(--gap-sm);
+  padding: var(--gap-sm);
 }
 
 .visualizer__item--grabbed {

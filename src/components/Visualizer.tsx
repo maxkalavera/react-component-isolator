@@ -1,7 +1,7 @@
 import React, { MouseEventHandler, useEffect, useRef, useState } from 'react';
 
-import BackgroundGrid from 'src/components/BackgroundGrid';
-import { ZOOM_FRACTIONS } from 'src/utils/constants';
+import BackgroundGrid from 'src/components/BackgroundCanvasGrid';
+import { ZOOM_FRACTIONS, BACKGROUND_CANVAS_FRAME_WIDTH } from 'src/utils/constants';
 import Grid from 'src/components/icons/Grid';
 import SwitchButton from 'src/components/SwitchButton';
 import ZoomSelect from 'src/components/ZoomSelect';
@@ -9,63 +9,44 @@ import ZoomBar from 'src/components/ZoomBar';
 import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import styles from 'src/styles/visualizer.module.css';
 
-interface Position {
-  positionX: number 
-  positionY: number
-  mousePositionX: number
-  mousePositionY: number
-}
-
 function Visualizer() {
-  const { selected } = useReactIsolatorContext();
+  const { selected, setSelectedPosition, selectedPosition } = useReactIsolatorContext();
   const [isGridOn, setIsGridOn] = useState<boolean>(true);
-  const [{positionX, positionY, mousePositionX, mousePositionY}, setPosition] = useState<Position>({ 
+  // const [mousePosition, setMousePosition] = useState<[number, number]>([0, 0]);
+  /*const [{positionX, positionY, mousePositionX, mousePositionY}, setPosition] = useState<Position>({ 
     positionX: 0, positionY: 0, 
     mousePositionX: 0, mousePositionY: 0
-  }); 
+  });*/ 
   const [isGrabbed, setIsGrabbed] = useState<boolean>(false);
   const [zoomFraction, setZoomFraction] = useState<(typeof ZOOM_FRACTIONS)[number]>('1.00');
   const itemElement = useRef<HTMLDivElement>(null);  // TODO: Remove
   const container = useRef<HTMLDivElement>(null);
 
   const onMouseMove: MouseEventHandler<HTMLElement> = (event) => {
-    setPosition((prevState) => {
-      if (container.current === null || itemElement.current === null)
-      return prevState;
+    if (container.current === null) {
+      return;
+    }
 
-      let containerBounds = container.current.getBoundingClientRect();
-      let mouseShiftX = event.clientX - containerBounds.x - mousePositionX;
-      let mouseShiftY = event.clientY - containerBounds.y - mousePositionY;
-  
-      if (
-        positionX + mouseShiftX > containerBounds.width 
-        || positionX + mouseShiftX < 0
-        || positionY + mouseShiftY > containerBounds.height
-        || positionY + mouseShiftY < 0
-      ) {
-        return prevState;
-      }
-  
-      return {
-      ...prevState, 
-      positionX: positionX + mouseShiftX,
-      positionY: positionY + mouseShiftY,
-      mousePositionX: mousePositionX + mouseShiftX,
-      mousePositionY:mousePositionY + mouseShiftY
-      }
-    });
+    let containerBounds = container.current.getBoundingClientRect();
+    let currentMousePosition = [
+      event.clientX - (containerBounds.x + BACKGROUND_CANVAS_FRAME_WIDTH), 
+      event.clientY - (containerBounds.y + BACKGROUND_CANVAS_FRAME_WIDTH)
+    ];
+
+    if ( currentMousePosition[0] > 0
+      && currentMousePosition[0] < containerBounds.width
+      && currentMousePosition[1] > 0
+      && currentMousePosition[1] < containerBounds.height
+    ) {
+      console.log('currentMousePosition', currentMousePosition)
+      setSelectedPosition([currentMousePosition[0], currentMousePosition[1]]);
+    }
   }
 
   const onItemSelected: MouseEventHandler<HTMLElement> = (event) => {
     if (container.current === null)
       return;
 
-    const bounds = container.current.getBoundingClientRect();
-    setPosition((prevState) => ({ 
-      ...prevState, 
-      mousePositionX: (event.clientX - bounds.x), 
-      mousePositionY: (event.clientY - bounds.y)
-    }));
     window.onmouseup = onItemSelectedRelease;
     setIsGrabbed(true);
   }
@@ -80,23 +61,22 @@ function Visualizer() {
   }
 
   const centerItem = () => {
-    if (container.current === null || itemElement.current === null)
+    if (container.current === null)
       return;
 
     let containerBounds = container.current.getBoundingClientRect();
-    let itemBounds = itemElement.current.getBoundingClientRect();
-    setPosition((prevState) => ({
-      ...prevState, 
-      positionX: (containerBounds.width * 0.5) - (itemBounds.width * 0.5),
-      positionY: (containerBounds.height * 0.5) - (itemBounds.height * 0.5)
-    }));
-  };
+    setSelectedPosition([
+      Math.floor(containerBounds.width * 0.5) - BACKGROUND_CANVAS_FRAME_WIDTH,
+      Math.floor(containerBounds.height * 0.5) - BACKGROUND_CANVAS_FRAME_WIDTH
+    ]);
+  }
 
   useEffect(() => {
-    centerItem();
-  }, [selected?.element]);
+    if (selectedPosition === null) {
+      centerItem();
+    }
+  }, [selectedPosition, container.current]);
 
-  let itemBounds = itemElement.current ? itemElement.current.getBoundingClientRect() : new DOMRect();
   return (
     <div className={styles.visualizer}>
       <div className={styles.visualizer__header}>
@@ -121,7 +101,7 @@ function Visualizer() {
           overflow: 'clip'
         }}
         className={styles.visualizer__content}
-        onMouseMove={isGrabbed? onMouseMove : undefined}
+        onMouseMove={isGrabbed ? onMouseMove : undefined}
         ref={container}
       >
         <BackgroundGrid
@@ -134,33 +114,33 @@ function Visualizer() {
           onChange={onZoomFractionChange}
           style={{
             position: 'absolute',
-            left: 12,
-            top: 12
+            left: BACKGROUND_CANVAS_FRAME_WIDTH + 12,
+            top: BACKGROUND_CANVAS_FRAME_WIDTH + 12
           }}
         />  
 
-        <div
-          className={`${styles.visualizer__item} ${isGrabbed ? styles['visualizer__item--grabbed'] : ''}`}
-          onMouseDown={onItemSelected}
-          ref={itemElement}
-          style={{
-            position: 'absolute',
-            left: positionX,
-            top: positionY,
-            transform: `scale(${zoomFraction})`
-          }}
-        >
-          <div 
-            className={styles['visualizer__item-content']}
-            onMouseDown={(event) => event.stopPropagation()}
+        { selected !== null && selectedPosition !== null ? 
+          <div
+            className={`${styles.visualizer__item} ${isGrabbed ? styles['visualizer__item--grabbed'] : ''}`}
+            onMouseDown={onItemSelected}
+            ref={itemElement}
+            style={{
+              position: 'absolute',
+              left: BACKGROUND_CANVAS_FRAME_WIDTH + selectedPosition[0],
+              top: BACKGROUND_CANVAS_FRAME_WIDTH + selectedPosition[1],
+              transform: `scale(${zoomFraction}) translate(-50%, -50%)`
+            }}
           >
-            
-            { selected 
-                ? selected.element 
-                : null 
-            }
-          </div>
-        </div>
+            <div 
+              className={styles['visualizer__item-content']}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              
+              {selected.element}
+            </div>
+          </div> : null
+        }
+
       </div>
     </div>
   );

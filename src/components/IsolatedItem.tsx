@@ -14,7 +14,7 @@ function IsolatedItem({
   useEffect(() => {
     addItem({
       name,
-      element
+      element,
     });
   }, []);
 
