@@ -147,23 +147,23 @@ function BackgroundCanvasGrid({
   zoomFraction?: number,
   unit?: number,
 }): ReactElement | null {
-  if (isGridOn) {
-    const canvasWrapperRef = useRef<HTMLDivElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    useEffect(() => {
-      if (canvasRef.current === null || canvasWrapperRef.current === null) {
-        return;
-      }
+  useEffect(() => {
+    if (canvasRef.current === null || canvasWrapperRef.current === null) {
+      return;
+    }
 
-      let canvasWrapper = canvasWrapperRef.current;
-      let canvas = canvasRef.current;
-      // Resize canvas to have same size as container in HTML DOM
-      canvas.width = canvasWrapper.offsetWidth;
-      canvas.height = canvasWrapper.offsetHeight;
+    let canvasWrapper = canvasWrapperRef.current;
+    let canvas = canvasRef.current;
+    // Resize canvas to have same size as container in HTML DOM
+    canvas.width = canvasWrapper.offsetWidth;
+    canvas.height = canvasWrapper.offsetHeight;
 
-      // Drawn background elements
-      {
+    // Drawn background elements
+    {
+      if (isGridOn) {
         // Draw thin grid
         drawGrid({ 
           canvas, 
@@ -178,41 +178,40 @@ function BackgroundCanvasGrid({
           unit: Math.floor(unit ** 2), 
           zoomFraction 
         });
-
-        // Draw frame
-        drawFrame({ 
-          canvas, 
-          color: COLORS['gray-700'], 
-          constrastColor: COLORS['gray-100'], 
-          unit: Math.floor(unit ** 2), 
-          zoomFraction 
-        });
       }
 
-    }, [
-      canvasRef.current, 
-      canvasWrapperRef.current, 
-      canvasWrapperRef.current?.offsetWidth, 
-      canvasWrapperRef.current?.offsetHeight, 
-      zoomFraction
-    ]);
+      // Draw frame
+      drawFrame({ 
+        canvas, 
+        color: COLORS['gray-700'], 
+        constrastColor: COLORS['gray-100'], 
+        unit: Math.floor(unit ** 2), 
+        zoomFraction 
+      });
+    }
 
-    return (
-      <div
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
-        ref={canvasWrapperRef}
-      >
-        <canvas
-          ref={canvasRef}
-        />
-      </div>
-    );  
-  } else {
-    return null;
-  }
+  }, [
+    isGridOn,
+    canvasRef.current, 
+    canvasWrapperRef.current, 
+    canvasWrapperRef.current?.offsetWidth, 
+    canvasWrapperRef.current?.offsetHeight, 
+    zoomFraction
+  ]);
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%'
+      }}
+      ref={canvasWrapperRef}
+    >
+      <canvas
+        ref={canvasRef}
+      />
+    </div>
+  );  
 }
 
 export default BackgroundCanvasGrid;

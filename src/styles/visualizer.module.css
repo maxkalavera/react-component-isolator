@@ -21,6 +21,8 @@
 
 .visualizer__content {
   flex-grow: 1;
+  position: relative;
+  overflow: clip;
   box-sizing: border-box;
   background: var(--white);
   border: 1px solid var(--gray-400);
@@ -46,6 +48,16 @@
 /* Handle on hover */
 .visualizer__content::-webkit-scrollbar-thumb:hover {
   box-shadow: inset 0 0 5px var(--gray-900);
+}
+
+.visualizer__working-area {
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: clip;
 }
 
 .visualizer__item {
