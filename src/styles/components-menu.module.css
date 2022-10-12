@@ -1,11 +1,19 @@
 .components-menu {
   width: 100%;
-  max-width: 191px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: var(--gap-md);
   gap: var(--gap-md);
+}
+
+.components-menu__wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow-x: clip;
 }
 
 .components-menu__header {
@@ -24,7 +32,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  overflow-y: auto;
   padding-right: 3px;
   gap: calc(var(--gap-sm) * 0.5);
 }

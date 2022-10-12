@@ -1,5 +1,5 @@
 interface IsolatedItem {
-  element: JSX.Element
+  jsxElement: JSX.Element
   name: string
 }
 

@@ -23,8 +23,12 @@ export const ZOOM_FRACTIONS_MAP = {
 } as const;
 
 /* Style */
-export const BACKGROUND_CANVAS_LINE_WIDTH = 1;
+export const BACKGROUND_CANVAS_THIN_LINE_WIDTH = 1;
+export const BACKGROUND_CANVAS_LINE_WIDTH = 2;
 export const BACKGROUND_CANVAS_FRAME_WIDTH = 24; // px
+export const DIVIDER_DEFAULT_WIDTH = 191; // px
+export const DIVIDER_MIN_WIDTH = 0; // px
+export const DIVIDER_MAX_WIDTH = 1024; // px
 
 // Colors
 
@@ -45,4 +49,16 @@ export const COLORS = {
   'gray-700': '#616161',
   'gray-800': '#424242',
   'gray-900': '#212121',
+
+  'primary': '#1FA9CF',
+  'primary-contrast': '#886d66',
+  'primary-100': '#bce9f5',
+  'primary-200': '#90daee',
+  'primary-300': '#64cbe8',
+  'primary-400': '#37bce1',
+  'primary-500': '#1FA9CF',
+  'primary-600': '#1ea3c8',
+  'primary-700': '#177f9b',
+  'primary-800': '#115b6f',
+  'primary-900': '#0a3643',
 };

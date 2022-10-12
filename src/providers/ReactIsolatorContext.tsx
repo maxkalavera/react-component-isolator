@@ -3,27 +3,35 @@ import React, { useContext, useEffect, useState } from 'react';
 import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
 
 export interface ReactIsolatorContext {
-  selected: IsolatedItem | null
+  selectedElement: IsolatedItem | null
+  selectedElementPosition: [number, number] | null
+  selectedElementDOMElement: HTMLElement | null
   items: IsolatedItem[]
   searchTerm: string
-  selectedPosition: [number, number] | null
-  setSelected: (item: IsolatedItem) => void
-  setSelectedPosition: (position: [number, number]) => void
+  isPendingBackgroundRender: boolean
+  setSelectedElement: (item: IsolatedItem) => void
+  setSelectedElementPosition: (position: [number, number]) => void
+  setSelectedElementDOMElement: (domElement: HTMLElement) => void
   addItem: (item: IsolatedItem) => void
   clearItems: () => void
   setSearchTerm: (item: string) => void
+  setIsPendingBackgroundRender: (isPendingBackgroundRender: boolean) => void
 };
 
 const defaultState: ReactIsolatorContext = {
-  selected: null,
+  selectedElement: null,
+  selectedElementPosition: null,
+  selectedElementDOMElement: null,
   items: [],
   searchTerm: '',
-  selectedPosition: null,
-  setSelected: (item: IsolatedItem) => {},
-  setSelectedPosition: (position: [number, number]) => {},
+  isPendingBackgroundRender: true,
+  setSelectedElement: (item: IsolatedItem) => {},
+  setSelectedElementPosition: (position: [number, number]) => {},
+  setSelectedElementDOMElement: (domElement: HTMLElement) => {},
   addItem: (item: IsolatedItem) => {},
   clearItems: () => {},
   setSearchTerm: (value: string) => {},
+  setIsPendingBackgroundRender: (isPendingBackgroundRender: boolean) => {}
 };
 
 const ReactIsolatorContext = React.createContext<ReactIsolatorContext>(defaultState);
@@ -38,26 +46,37 @@ function ReactIsolatorContextProvider({
   children?: JSX.Element[] | JSX.Element
 }): JSX.Element {
   const [{ 
-    selected, 
+    selectedElement,
+    selectedElementPosition,
+    selectedElementDOMElement,
     items, 
     searchTerm, 
-    selectedPosition 
+    isPendingBackgroundRender,
   }, setReactIsolatorContext] = useState<ReactIsolatorContext>(defaultState);
 
-  const setSelected = (item: IsolatedItem) => {
+  const setSelectedElement = (item: IsolatedItem) => {
     setReactIsolatorContext((prevState) => {
       return {
         ...prevState,
-        selected: item
+        selectedElement: item
       };
     });
   }
 
-  const setSelectedPosition = (position: [number, number]) => {
+  const setSelectedElementDOMElement = (domElement: HTMLElement) => {
     setReactIsolatorContext((prevState) => {
       return {
         ...prevState,
-        selectedPosition: position,
+        selectedElementDOMElement: domElement,
+      };
+    });
+  };
+
+  const setSelectedElementPosition = (position: [number, number]) => {
+    setReactIsolatorContext((prevState) => {
+      return {
+        ...prevState,
+        selectedElementPosition: position,
       };
     });
   }
@@ -66,7 +85,7 @@ function ReactIsolatorContextProvider({
     setReactIsolatorContext((prevState) => {
       return {
         ...prevState,
-        selected: prevState.items.length === 0 ? item : prevState.selected,
+        selectedElement: prevState.items.length === 0 ? item : prevState.selectedElement,
         items: [...prevState.items, item],
       };
     });
@@ -90,17 +109,31 @@ function ReactIsolatorContextProvider({
     });
   }
 
+  const setIsPendingBackgroundRender = (isPendingBackgroundRender: boolean) => {
+    setReactIsolatorContext((prevState) => {
+      return {
+        ...prevState,
+        isPendingBackgroundRender
+      };
+    });
+
+  }
+
   return (
     <ReactIsolatorContext.Provider value={{
-      selected,
+      selectedElement,
+      selectedElementPosition,
+      selectedElementDOMElement,
       items,
       searchTerm,
-      selectedPosition,
-      setSelected,
-      setSelectedPosition,
+      isPendingBackgroundRender,
+      setSelectedElement,
+      setSelectedElementDOMElement,
+      setSelectedElementPosition,
       addItem,
       clearItems,
       setSearchTerm,
+      setIsPendingBackgroundRender,
     }}>
       { children }
     </ReactIsolatorContext.Provider>
