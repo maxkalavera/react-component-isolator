@@ -61,4 +61,10 @@ export const COLORS = {
   'primary-700': '#177f9b',
   'primary-800': '#115b6f',
   'primary-900': '#0a3643',
+
+  'size-frame-position-line': '#ff524a50',
+  'size-frame-margin': '#1ee19650',
+  'size-frame-border': '#e1341e50',
+  'size-frame-padding': '#1e6ae150',
+  'size-frame-content': '#1FA9CF50',
 };

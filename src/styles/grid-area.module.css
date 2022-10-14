@@ -21,6 +21,7 @@
   align-items: flex-start;
   gap: var(--gap-sm);
   padding: var(--gap-sm);
+  transform-origin: 0 0;
 }
 
 .grid-area__item--grabbed {

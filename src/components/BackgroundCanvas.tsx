@@ -159,14 +159,14 @@ function drawSizeFrames({
   frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
   selectedElementDOMElement=null,
   selectedElementPosition=null,
-  setSelectedRuleIndex=()=>{}
+  zoomFractionValue=1.0,
 }: {
   canvas: HTMLCanvasElement,
   lineWidth?: number,
   frameWidth?: number,
   selectedElementDOMElement?: HTMLElement | null,
   selectedElementPosition?: [number, number] | null,
-  setSelectedRuleIndex?: React.Dispatch<React.SetStateAction<[number, number]>>,
+  zoomFractionValue?: number,
 }) {
   let context = canvas.getContext("2d");
   if ( 
@@ -176,9 +176,21 @@ function drawSizeFrames({
   ) {
     return;
   }
-
-  let halfframeWidthWidth = Math.floor(frameWidth * 0.5);
   const canvasPosition = selectedElementPosition.map((item) => item + frameWidth);
+
+  context.beginPath();
+  context.save();
+  context.lineWidth = Math.floor(lineWidth * zoomFractionValue);
+  context.strokeStyle = COLORS['size-frame-position-line'];
+
+  context.moveTo(canvasPosition[0], 0);
+  context.lineTo(canvasPosition[0], canvas.height);
+
+  context.moveTo(0, canvasPosition[1]);
+  context.lineTo(canvas.width, canvasPosition[1]);
+
+  context.stroke();
+  context.restore();
 
   // Width, border, padding and margin rules
   const computedStyle = window.getComputedStyle(selectedElementDOMElement, null);
@@ -191,7 +203,7 @@ function drawSizeFrames({
 
     context.beginPath();
     context.save();
-    context.fillStyle = `${color}80`;
+    context.fillStyle = color;
     context.rect(...rect);
     context.fill();
     context.restore();
@@ -204,51 +216,56 @@ function drawSizeFrames({
   let borderRight = getFloatValues(computedStyle.getPropertyValue('border-right'))[0];
   let marginLeft = getFloatValues(computedStyle.getPropertyValue('margin-left'))[0];
   let marginRight = getFloatValues(computedStyle.getPropertyValue('margin-right'))[0];
-  let contentWidth = width - paddingLeft - paddingRight;
+  let contentWidth = width - paddingLeft - paddingRight - borderLeft - borderRight;
   
   const horizontalFrames = [
     {
       value: marginLeft,
-      color: COLORS['primary-100'],
+      color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     },
     {
       value: borderLeft,
-      color: COLORS['red'],
+      color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
       value: paddingLeft,
-      color: COLORS['primary-300'],
+      color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
     {
       value: contentWidth,
-      color: COLORS['primary-500'],
+      color: COLORS['size-frame-content'],
       rect: Array(4).fill(0)
     },
     {
       value: paddingRight,
-      color: COLORS['primary-300'],
+      color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
     {
       value: borderRight,
-      color: COLORS['red'],
+      color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
       value: marginRight,
-      color: COLORS['primary-100'],
+      color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     }
   ];
 
   horizontalFrames.map((item) => item.value).reduce((prev, current, index) => {
-    horizontalFrames[index].rect = [prev, 0, Math.floor(current), canvas.height];  // frameWidth
-    return Math.floor(prev + current);
+    let currentWithZoom = Math.floor(current * zoomFractionValue);
+    horizontalFrames[index].rect = [prev, 0, currentWithZoom, canvas.height];  // frameWidth
+    return Math.floor(prev + currentWithZoom);
   }, 
-    canvasPosition[0] - Math.floor(marginLeft + borderLeft + paddingLeft + (contentWidth * 0.5))
+    canvasPosition[0]
+    - Math.floor(
+      (marginLeft + borderLeft + paddingLeft + (contentWidth * 0.5)) 
+      * zoomFractionValue
+    )
   );  
 
   horizontalFrames.forEach((item) => {
@@ -265,51 +282,56 @@ function drawSizeFrames({
   let borderBottom = getFloatValues(computedStyle.getPropertyValue('border-bottom'))[0];
   let marginTop = getFloatValues(computedStyle.getPropertyValue('margin-top'))[0];
   let marginBottom = getFloatValues(computedStyle.getPropertyValue('margin-bottom'))[0];
-  let contentHeight = height - paddingTop - paddingBottom;
+  let contentHeight = height - paddingTop - paddingBottom - borderTop - borderBottom;
 
   const verticalFrames = [
     {
       value: marginTop,
-      color: COLORS['primary-100'],
+      color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     },
     {
       value: borderTop,
-      color: COLORS['red'],
+      color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
       value: paddingTop,
-      color: COLORS['primary-300'],
+      color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
     {
       value: contentHeight,
-      color: COLORS['primary-500'],
+      color: COLORS['size-frame-content'],
       rect: Array(4).fill(0)
     },
     {
       value: paddingBottom,
-      color: COLORS['primary-300'],
+      color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
     {
       value: borderBottom,
-      color: COLORS['red'],
+      color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
       value: marginBottom,
-      color: COLORS['primary-100'],
+      color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     }
   ];
 
   verticalFrames.map((item) => item.value).reduce((prev, current, index) => {
-    verticalFrames[index].rect = [0, prev, canvas.width, Math.floor(current)];
-    return Math.floor(prev + current);
+    let currentWithZoom = Math.floor(current * zoomFractionValue);
+    verticalFrames[index].rect = [0, prev, canvas.width, currentWithZoom];
+    return Math.floor(prev + currentWithZoom);
   }, 
-    canvasPosition[1] - Math.floor(marginTop + borderTop + paddingTop + (contentHeight * 0.5))
+    canvasPosition[1] 
+    - Math.floor(
+      (marginTop + borderTop + paddingTop + (contentHeight * 0.5))
+      * zoomFractionValue
+    )
   );  
 
   verticalFrames.forEach((item) => {
@@ -400,6 +422,7 @@ function BackgroundCanvas({
           canvas,
           selectedElementDOMElement,
           selectedElementPosition,
+          zoomFractionValue
         });
       }
     }
@@ -431,14 +454,31 @@ function BackgroundCanvas({
     selectedElementDOMElement,
     selectedElementPosition,
     zoomFraction,
-    //mousePosition,
   ]);
 
+  // Set listener to render if size of window changes
   useEffect(() => {
     window.onresize = () => {
       setIsPendingBackgroundRender(true);
     };
   }, []);
+
+  // Set listener to render if size of the selected element changes
+  useEffect(()=> {
+    if (selectedElementDOMElement === null)
+      return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      console.log('SIZE CHANGED');
+      setIsPendingBackgroundRender(true);
+    });
+    resizeObserver.observe(selectedElementDOMElement);
+
+    return () => {
+      resizeObserver.unobserve(selectedElementDOMElement);
+    }
+
+  }, [selectedElementDOMElement])
 
   return (
     <div
@@ -448,7 +488,6 @@ function BackgroundCanvas({
         cursor: 'crosshair'
       }}
       ref={canvasWrapperRef}
-      //onMouseMove={onMouseMove}
     >
       <canvas
         ref={canvasRef}
