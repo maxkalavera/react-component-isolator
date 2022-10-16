@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css?family=Work+Sans|Roboto|PT+Serif&display=swap');
+
+:root {
+  --black: #000000;
+  --white: #FFFFFF;
+  --background: #FFFFFF;
+
+  --gray: #9E9E9E;
+  --gray-contrast: var(--white);
+  --gray-50: #FAFAFA;
+  --gray-100: #F5F5F5;
+  --gray-200: #EEEEEE;
+  --gray-300: #E0E0E0;
+  --gray-400: #BDBDBD;
+  --gray-500: #9E9E9E;
+  --gray-600: #757575;
+  --gray-700: #616161;
+  --gray-800: #424242;
+  --gray-900: #212121;
+
+  --primary: var(--gray-700);
+  --primary-contrast: var(--white);
+  --text-color: var(--gray-900);
+
+  font-size: 16px;
+  --content-sm: 35.5rem;   /* 35.5rem 568px */
+  --content-md: 48.0rem;   /* 48.0rem 768px */
+  --content-lg: 64.0rem;   /* 64.0rem 1024px */
+  --content-xl: 80.0rem;   /* 80.0rem 1280px */
+  --content-xxl: 120.0rem; /* 120.0rem 1920px */
+  --gap-sm: 1rem;
+  --gap-md: 2rem;
+  --gap-lg: 4rem;
+  --gap-xl: 8rem;
+  --gap-xxl: 16rem;
+  
+  --header-height: 72px;
+  --footer-height: 0px;
+  --content-container-padding: var(--gap-md);
+  --content-container-min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  --content-height: calc(var(--content-container-min-height) - calc(2 * var(--content-container-padding)));
+}
+
+body, h1, h2, h3, h4, h5, p, small {
+  margin: 0px;
+}
+
+body, html {
+  min-height: -webkit-fill-available;
+}
+
+.primary-h1 {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 2.75rem;
+}
+
+.primary-h2 {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.0rem;
+}
+
+.primary-h3 {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.primary-h4 {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.0rem;
+}
+
+.primary-h5 {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.primary-p {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.0rem;
+}
+
+.primary-small {
+  font-family: 'Work Sans', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+
+.secondary-h1 {
+  font-family: 'Roboto', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.5rem;
+}
+
+.secondary-h2 {
+  font-family: 'Roboto', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.0rem;
+}
+
+.secondary-h3 {
+  font-family: 'Roboto', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.secondary-h4 {
+  font-family: 'Roboto', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.0rem;
+}
+
+.secondary-h5 {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.secondary-p {
+  font-family: 'Roboto', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.0rem;
+}
+
+.secondary-small {
+  font-family: 'Roboto', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+
+.tertiary-h1 {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.5rem;
+}
+
+.tertiary-h2 {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.0rem;
+}
+
+.tertiary-h3 {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.tertiary-h4 {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.0rem;
+}
+
+.tertiary-h5 {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.tertiary-p {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.0rem;
+}
+
+.tertiary-small {
+  font-family: 'PT Serif', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.75rem;
+}
