@@ -1,6 +1,6 @@
 import React, { useEffect, useState, MouseEventHandler, useRef } from 'react';
 
-import { DIVIDER_DEFAULT_WIDTH, DIVIDER_MIN_WIDTH, DIVIDER_MAX_WIDTH } from 'src/utils/constants';
+import { DIVIDER_MIN_WIDTH, DIVIDER_MAX_WIDTH } from 'src/utils/constants';
 import { ReactIsolatorContextProvider, useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import Visualizer from 'src/components/Visualizer';
 import ComponentsMenu from 'src/components/ComponentsMenu';
@@ -14,51 +14,67 @@ function ReactIsolator({
   children?: JSX.Element[] | JSX.Element
 }): JSX.Element {
   const dividerRef = useRef<HTMLDivElement>(null);
-  const { clearItems, setIsPendingBackgroundRender } = useReactIsolatorContext();
-  const [dividerWidth, setDividerWith] = useState<number>(DIVIDER_DEFAULT_WIDTH);
-  const [_, setMousePosition] = useState<[number, number]>([0.0, 0.0]);
+  const { 
+    clearItems, 
+    setIsPendingBackgroundRender,
+    dividerWidth, setDividerWith,
+  } = useReactIsolatorContext();
+  const [{ mousePositionDelta }, setMousePosition] = 
+    useState<{ 
+      mousePositionX: number, 
+      mousePositionY: number, 
+      mousePositionDelta: number 
+    }>({
+      'mousePositionX': 0.0, 
+      'mousePositionY': 0.0, 
+      'mousePositionDelta': 0.0,
+  });
+
+  useEffect(() => {
+    setDividerWith((prevDividerWidth) => {
+      let proposedDividerWidth = prevDividerWidth + mousePositionDelta;
+
+      if (proposedDividerWidth < DIVIDER_MIN_WIDTH) {
+        proposedDividerWidth = DIVIDER_MIN_WIDTH
+      } else if (proposedDividerWidth > DIVIDER_MAX_WIDTH) {
+        proposedDividerWidth = DIVIDER_MAX_WIDTH
+      }
+
+      return proposedDividerWidth;
+    });
+
+    setIsPendingBackgroundRender(true);
+  }, [mousePositionDelta]);
 
   const onMouseMove: (
     ((this: GlobalEventHandlers, ev: MouseEvent) => any) 
     & ((this: Window, ev: MouseEvent) => any)
   ) = (event) => {
-
     if (dividerRef.current === null) {
       return;
     }
 
-    setMousePosition((prevState) => {
-      const deltaMousePosition = event.clientX - prevState[0];
-  
-      setDividerWith((prevDividerWidth) => {
-        let proposedDividerWidth = prevDividerWidth + deltaMousePosition;
-  
-        if (proposedDividerWidth < DIVIDER_MIN_WIDTH) {
-          proposedDividerWidth = DIVIDER_MIN_WIDTH
-        } else if (proposedDividerWidth > DIVIDER_MAX_WIDTH) {
-          proposedDividerWidth = DIVIDER_MAX_WIDTH
-        }
-  
-        return proposedDividerWidth;
-      });   
-
-      return [event.clientX, event.clientY];
-    });
-
-    setIsPendingBackgroundRender(true);
+    setMousePosition((prevState) => ({
+      mousePositionX: event.clientX, 
+      mousePositionY: event.clientY, 
+      mousePositionDelta: event.clientX - prevState.mousePositionX,
+    }));
   }
 
   const onDividerGrabbed: MouseEventHandler<HTMLElement> = (event) => {
     event.preventDefault();
-    setMousePosition([event.clientX, event.clientY]);
-    // setIsDividerGrabbed(true);
+    setMousePosition((prevState) => ({
+      ...prevState,
+      mousePositionX: event.clientX, 
+      mousePositionY: event.clientY, 
+    }));
+
     window.onmousemove = onMouseMove;
     window.onmouseup = onDividerReleased;
     window.document.onmouseleave = onDividerReleased;
   }
 
   const onDividerReleased = () => {
-    // setIsDividerGrabbed(false);
     window.onmousemove = null; 
     window.onmouseup = null;
   }

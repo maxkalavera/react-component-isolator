@@ -68,3 +68,5 @@ export const COLORS = {
   'size-frame-padding': '#1e6ae150',
   'size-frame-content': '#1FA9CF50',
 };
+
+export const LOCAL_STORAGE_CONTEXT_ID = '04e7b431-6e23-45df-9314-2798fd459862' as const;

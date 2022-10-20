@@ -2,8 +2,7 @@ import React, {
   ReactElement, 
   useEffect, 
   useRef, 
-  useLayoutEffect, 
-  MouseEventHandler, 
+  useLayoutEffect,  
   useState 
 } from "react";
 
@@ -18,30 +17,30 @@ import {
   ZOOM_FRACTIONS
 } from 'src/utils/constants';
 
+import type { SizeValues } from 'src/interfaces/BackgroundCanvas.interfaces';
+
 const UNIT = 10;
 
 function drawGrid({
   canvas,
   color=COLORS['gray-400'],
-  zoomFractionValue=1.0,
   lineWidth=BACKGROUND_CANVAS_THIN_LINE_WIDTH,
   frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
-  unit=UNIT
+  unit=UNIT,
+  step=UNIT,
 }: {
   canvas: HTMLCanvasElement,
   color?: string,
-  zoomFractionValue?: number,
   lineWidth?: number,
   frameWidth?: number,
-  unit?: number
+  unit?: number,
+  step?: number,
 }) {
   let context = canvas.getContext("2d");
-
   if (context === null) {
     return;
   }
 
-  let step = Math.floor(unit * zoomFractionValue);
   let initialLinePosition = Math.floor(frameWidth / step) * -step;
   context.beginPath();
   context.lineWidth = lineWidth;
@@ -63,18 +62,18 @@ function drawFrameRulers({
   canvas,
   color=COLORS['primary-900'],
   constrastColor=COLORS['gray-100'],
-  zoomFractionValue=1.0,
   lineWidth=BACKGROUND_CANVAS_THIN_LINE_WIDTH,
   frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
   unit=Math.floor(UNIT) ** 2,
+  step=Math.floor(UNIT) ** 2,
 }: {
   canvas: HTMLCanvasElement,
   color?: string,
   constrastColor?: string,
-  zoomFractionValue?: number,
   lineWidth?: number,
   frameWidth?: number,
   unit?: number,
+  step?: number,
   selectedElementDOMElement?: HTMLElement | null,
   selectedElementPosition?: [number, number] | null,
 }) {
@@ -84,7 +83,6 @@ function drawFrameRulers({
   }
 
   let halfframeWidthWidth = Math.floor(frameWidth * 0.5);
-  let step = Math.floor(unit * zoomFractionValue);
 
   context.beginPath();
   context.save();
@@ -346,24 +344,22 @@ function drawSizeFrames({
 * Component
 ******************************************************************************/
 function BackgroundCanvas({
-  isGridOn=true,
-  isRulerOn=true,
-  isSizeFramesOn=true,
-  zoomFraction='1.00',
   unit=UNIT,
 }: {
-  isGridOn?: boolean,
-  isRulerOn?: boolean,
-  isSizeFramesOn?: boolean,
-  zoomFraction?: (typeof ZOOM_FRACTIONS)[number],
   unit?: number,
 }): ReactElement | null {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const timeoutRef = useRef<NodeJS.Timer | null>(null);
+  const [sizeValues, setSizeValues] = useState<SizeValues>();
   const { 
     selectedElementDOMElement, 
     selectedElementPosition, 
-    isPendingBackgroundRender, 
+    isPendingBackgroundRender,
+    isGridOn,
+    isRulerOn,
+    zoomFraction,
+    isSizeFramesOn,
     setIsPendingBackgroundRender 
   } = useReactIsolatorContext();
 
@@ -383,6 +379,7 @@ function BackgroundCanvas({
     }
     let canvas = canvasRef.current;
     let zoomFractionValue = Number(zoomFraction);
+    let step = Math.floor(zoomFractionValue * UNIT);
 
     // Drawn background elements
     {
@@ -391,15 +388,15 @@ function BackgroundCanvas({
         drawGrid({ 
           canvas, 
           color: `${COLORS['gray-400']}BB`,
-          unit: unit, 
-          zoomFractionValue 
+          unit: UNIT,
+          step
         });
         // Draw thick grid
         drawGrid({ 
           canvas, 
-          color: COLORS['gray-400'], 
-          unit: Math.floor(unit ** 2), 
-          zoomFractionValue 
+          color: COLORS['gray-400'],
+          unit: Math.floor(UNIT ** 2),
+          step: Math.floor(step * UNIT)
         });
       }
 
@@ -408,9 +405,9 @@ function BackgroundCanvas({
         drawFrameRulers({ 
           canvas, 
           color: COLORS['primary-900'], 
-          constrastColor: COLORS['gray-100'], 
-          unit: Math.floor(unit ** 2), 
-          zoomFractionValue,
+          constrastColor: COLORS['gray-100'],
+          unit: Math.floor(UNIT ** 2),
+          step: Math.floor(step * UNIT),
           selectedElementDOMElement,
           selectedElementPosition,
         });
@@ -428,17 +425,17 @@ function BackgroundCanvas({
     }
   };
 
+  
   // To avoid rendering too many times per second
-  var lastRender: null | NodeJS.Timeout = null;
   const render = () => {
-    if (lastRender === null) {
+    if (timeoutRef.current === null) {
       resizeCanvas();
       draw();
-      lastRender = setTimeout(() => {
-        lastRender = null;
+      timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = null;
       }, 30);  
     }
-  }
+  };
 
   // Translate from React strate to vanilla JS calls
   useLayoutEffect(() => {
@@ -454,6 +451,20 @@ function BackgroundCanvas({
     selectedElementDOMElement,
     selectedElementPosition,
     zoomFraction,
+    sizeValues?.width,
+    sizeValues?.paddingLeft,
+    sizeValues?.paddingRight,
+    sizeValues?.borderLeft,
+    sizeValues?.borderRight,
+    sizeValues?.marginLeft,
+    sizeValues?.marginRight,
+    sizeValues?.height,
+    sizeValues?.paddingTop,
+    sizeValues?.paddingBottom,
+    sizeValues?.borderTop,
+    sizeValues?.borderBottom,
+    sizeValues?.marginTop,
+    sizeValues?.marginBottom,
   ]);
 
   // Set listener to render if size of window changes
@@ -463,29 +474,45 @@ function BackgroundCanvas({
     };
   }, []);
 
-  // Set listener to render if size of the selected element changes
-  useEffect(()=> {
+  useEffect(() => {
     if (selectedElementDOMElement === null)
       return;
 
-    const resizeObserver = new ResizeObserver(() => {
-      console.log('SIZE CHANGED');
-      setIsPendingBackgroundRender(true);
-    });
-    resizeObserver.observe(selectedElementDOMElement);
+    const computedStyle = window.getComputedStyle(selectedElementDOMElement, null);
 
-    return () => {
-      resizeObserver.unobserve(selectedElementDOMElement);
-    }
+    const timeoutRef = setInterval(() => {
+      const comparisonSizeValues: SizeValues = {
+        width: getFloatValues(computedStyle.getPropertyValue('width'))[0],
+        paddingLeft: getFloatValues(computedStyle.getPropertyValue('padding-left'))[0],
+        paddingRight: getFloatValues(computedStyle.getPropertyValue('padding-right'))[0],
+        borderLeft: getFloatValues(computedStyle.getPropertyValue('border-left'))[0],
+        borderRight: getFloatValues(computedStyle.getPropertyValue('border-right'))[0],
+        marginLeft: getFloatValues(computedStyle.getPropertyValue('margin-left'))[0],
+        marginRight: getFloatValues(computedStyle.getPropertyValue('margin-right'))[0],
+        height: getFloatValues(computedStyle.getPropertyValue('height'))[0],
+        paddingTop: getFloatValues(computedStyle.getPropertyValue('padding-top'))[0],
+        paddingBottom: getFloatValues(computedStyle.getPropertyValue('padding-bottom'))[0],
+        borderTop: getFloatValues(computedStyle.getPropertyValue('border-top'))[0],
+        borderBottom: getFloatValues(computedStyle.getPropertyValue('border-bottom'))[0],
+        marginTop: getFloatValues(computedStyle.getPropertyValue('margin-top'))[0],
+        marginBottom: getFloatValues(computedStyle.getPropertyValue('margin-bottom'))[0],
+      };
 
-  }, [selectedElementDOMElement])
+      setSizeValues((prevState) => (
+        (JSON.stringify(prevState) === JSON.stringify(comparisonSizeValues)) 
+        ? prevState
+        : comparisonSizeValues
+      ));
+    }, 1000 / 24);
+
+    return () => clearInterval(timeoutRef);
+  }, [selectedElementDOMElement]);
 
   return (
     <div
       style={{
         width: '100%',
         height: '100%',
-        cursor: 'crosshair'
       }}
       ref={canvasWrapperRef}
     >

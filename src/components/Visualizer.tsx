@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import GridArea from 'src/components/GridArea';
 import BackgroundCanvas from 'src/components/BackgroundCanvas';
 import FileRulerFile from 'src/components/icons/FileRulerFile';
@@ -12,22 +13,20 @@ import { ZOOM_FRACTIONS, BACKGROUND_CANVAS_FRAME_WIDTH } from 'src/utils/constan
 import styles from 'src/styles/visualizer.module.css';
 
 function Visualizer() {
-  const [isGridOn, setIsGridOn] = useState<boolean>(true);
-  const [isRulerOn, setIsRulerOn] = useState<boolean>(true);
-  const [isSizeFramesOn, setIsSizeFramesOn] = useState<boolean>(true);
+  const { 
+    isGridOn, setIsGridOn, 
+    isRulerOn, setIsRulerOn, 
+    isSizeFramesOn, setIsSizeFramesOn,
+    zoomFraction, setZoomFraction,
+  } = useReactIsolatorContext();
   const [mousePosition, setMousePosition] = useState<[number, number]>([0.0, 0.0]);
-  const [zoomFraction, setZoomFraction] = useState<(typeof ZOOM_FRACTIONS)[number]>('1.00');
-
-  const onZoomFractionChange = (value: (typeof ZOOM_FRACTIONS)[number]) => {
-    setZoomFraction(value);
-  }
 
   return (
     <div className={styles.visualizer}>
       <div className={styles.visualizer__header}>
         <SwitchButton
           value={isSizeFramesOn}
-          onChange={() => { setIsSizeFramesOn((prevState) => !prevState) }}
+          onChange={() => { setIsSizeFramesOn(!isSizeFramesOn) }}
         >
           <FileRulerFile 
             width={18}
@@ -37,7 +36,7 @@ function Visualizer() {
 
         <SwitchButton
           value={isRulerOn}
-          onChange={() => { setIsRulerOn((prevState) => !prevState) }}
+          onChange={() => { setIsRulerOn(!isRulerOn) }}
         >
           <Rulers 
             width={18}
@@ -47,7 +46,7 @@ function Visualizer() {
 
         <SwitchButton
           value={isGridOn}
-          onChange={() => { setIsGridOn((prevState) => !prevState) }}
+          onChange={() => { setIsGridOn(!isGridOn) }}
         >
           <Grid 
             width={18}
@@ -55,24 +54,16 @@ function Visualizer() {
           />
         </SwitchButton>
 
-        <ZoomSelect 
-          value={zoomFraction}
-          onChange={setZoomFraction}
-        />
+        <ZoomSelect />
       </div>
       <div 
         className={styles.visualizer__content}
       >
-        <BackgroundCanvas
-          isGridOn={isGridOn}
-          isRulerOn={isRulerOn}
-          isSizeFramesOn={isSizeFramesOn}
-          zoomFraction={zoomFraction}
-        />
+        <BackgroundCanvas />
 
         <ZoomBar 
           value={zoomFraction}
-          onChange={onZoomFractionChange}
+          onChange={(value) => setZoomFraction(value)}
           style={{
             position: 'absolute',
             left: BACKGROUND_CANVAS_FRAME_WIDTH + 12,
@@ -83,8 +74,6 @@ function Visualizer() {
         <GridArea
           mousePosition={mousePosition}
           setMousePosition={setMousePosition}
-          zoomFraction={zoomFraction}
-          isRulerOn={isRulerOn}
         />
       </div>
     </div>

@@ -1,20 +1,16 @@
 import React from 'react';
 
+import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import { ZOOM_FRACTIONS, ZOOM_FRACTIONS_MAP } from 'src/utils/constants';
 import styles from 'src/styles/zoom-select.module.css';
 
 
-function ZoomSelect({
-  value='1.00',
-  onChange=() => {}
-}: {
-  value?: (typeof ZOOM_FRACTIONS)[number]
-  onChange?: (value: (typeof ZOOM_FRACTIONS)[number]) => void
-}) {
+function ZoomSelect() {
+  const { zoomFraction, setZoomFraction } = useReactIsolatorContext();
 
   const onOptionSelected: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     if (ZOOM_FRACTIONS.find(item => item === event.target.value) !== null) {
-      onChange(event.target.value as (typeof ZOOM_FRACTIONS)[number])
+      setZoomFraction(event.target.value as (typeof ZOOM_FRACTIONS)[number])
     } else {
       throw `Not valid Zoom fraction select option [${event.target.value}]`;
     }
@@ -23,7 +19,7 @@ function ZoomSelect({
   return (
     <select
       className={`select ${styles['zoom-select']}`}
-      value={value}
+      value={zoomFraction}
       onChange={onOptionSelected}
     >
       { ZOOM_FRACTIONS.map(item => (

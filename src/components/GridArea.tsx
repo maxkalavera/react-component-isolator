@@ -7,19 +7,15 @@ import styles from 'src/styles/grid-area.module.css';
 function GridArea ({
   mousePosition,
   setMousePosition,
-  zoomFraction,
-  isRulerOn=true,
 }: {
   mousePosition: [number, number]
   setMousePosition: React.Dispatch<React.SetStateAction<[number, number]>>
-  zoomFraction: (typeof ZOOM_FRACTIONS)[number]
-  isRulerOn?: boolean,
 }) {
   const { 
-    selectedElement, 
-    setSelectedElementPosition, 
-    selectedElementPosition, 
-    setSelectedElementDOMElement 
+    selectedElement, setSelectedElementPosition, 
+    selectedElementPosition, setSelectedElementDOMElement,
+    zoomFraction,
+    isRulerOn,
   } = useReactIsolatorContext();
   const [isGrabbed, setIsGrabbed] = useState<boolean>(false);
   const container = useRef<HTMLDivElement>(null);
