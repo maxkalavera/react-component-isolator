@@ -1,9 +1,9 @@
 import React, { 
   ReactElement, 
   useEffect, 
-  useRef, 
-  useLayoutEffect,  
-  useState 
+  useRef,
+  useState, 
+  useCallback
 } from "react";
 
 import { getFloatValues } from 'src/utils/string';
@@ -14,7 +14,8 @@ import {
   BACKGROUND_CANVAS_THIN_LINE_WIDTH,
   BACKGROUND_CANVAS_FRAME_WIDTH,
   COLORS,
-  ZOOM_FRACTIONS
+  SELECTED_ELEMENT_WRAPPER_ID,
+  SIZE_VALUES_DEFAULT,
 } from 'src/utils/constants';
 
 import type { SizeValues } from 'src/interfaces/BackgroundCanvas.interfaces';
@@ -26,7 +27,6 @@ function drawGrid({
   color=COLORS['gray-400'],
   lineWidth=BACKGROUND_CANVAS_THIN_LINE_WIDTH,
   frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
-  unit=UNIT,
   step=UNIT,
 }: {
   canvas: HTMLCanvasElement,
@@ -41,7 +41,7 @@ function drawGrid({
     return;
   }
 
-  let initialLinePosition = Math.floor(frameWidth / step) * -step;
+  let initialLinePosition = Math.floor(frameWidth / step) * - step;
   context.beginPath();
   context.lineWidth = lineWidth;
   context.strokeStyle = color;
@@ -67,15 +67,13 @@ function drawFrameRulers({
   unit=Math.floor(UNIT) ** 2,
   step=Math.floor(UNIT) ** 2,
 }: {
-  canvas: HTMLCanvasElement,
-  color?: string,
-  constrastColor?: string,
-  lineWidth?: number,
-  frameWidth?: number,
-  unit?: number,
-  step?: number,
-  selectedElementDOMElement?: HTMLElement | null,
-  selectedElementPosition?: [number, number] | null,
+  canvas: HTMLCanvasElement
+  color?: string
+  constrastColor?: string
+  lineWidth?: number
+  frameWidth?: number
+  unit?: number
+  step?: number
 }) {
   let context = canvas.getContext("2d");
   if (context === null) {
@@ -155,26 +153,25 @@ function drawSizeFrames({
   canvas,
   lineWidth=BACKGROUND_CANVAS_LINE_WIDTH,
   frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
-  selectedElementDOMElement=null,
   selectedElementPosition=null,
   zoomFractionValue=1.0,
+  sizeValues=SIZE_VALUES_DEFAULT,
 }: {
   canvas: HTMLCanvasElement,
   lineWidth?: number,
   frameWidth?: number,
-  selectedElementDOMElement?: HTMLElement | null,
-  selectedElementPosition?: [number, number] | null,
+  selectedElementPosition?: { x: number, y: number } | null,
   zoomFractionValue?: number,
+  sizeValues?: SizeValues,
 }) {
   let context = canvas.getContext("2d");
   if ( 
     context === null
-    || selectedElementDOMElement === null 
     || selectedElementPosition === null
   ) {
     return;
   }
-  const canvasPosition = selectedElementPosition.map((item) => item + frameWidth);
+  const canvasPosition = [selectedElementPosition.x + frameWidth,  selectedElementPosition.y + frameWidth];
 
   context.beginPath();
   context.save();
@@ -190,9 +187,7 @@ function drawSizeFrames({
   context.stroke();
   context.restore();
 
-  // Width, border, padding and margin rules
-  const computedStyle = window.getComputedStyle(selectedElementDOMElement, null);
-  const drawFrame = (
+  const drawFrame = (  // Width, border, padding and margin rules
     rect: [number, number, number, number], 
     color: string
   ) => {
@@ -206,29 +201,27 @@ function drawSizeFrames({
     context.fill();
     context.restore();
   };
-
-  let width = getFloatValues(computedStyle.getPropertyValue('width'))[0];
-  let paddingLeft = getFloatValues(computedStyle.getPropertyValue('padding-left'))[0];
-  let paddingRight = getFloatValues(computedStyle.getPropertyValue('padding-right'))[0];
-  let borderLeft = getFloatValues(computedStyle.getPropertyValue('border-left'))[0];
-  let borderRight = getFloatValues(computedStyle.getPropertyValue('border-right'))[0];
-  let marginLeft = getFloatValues(computedStyle.getPropertyValue('margin-left'))[0];
-  let marginRight = getFloatValues(computedStyle.getPropertyValue('margin-right'))[0];
-  let contentWidth = width - paddingLeft - paddingRight - borderLeft - borderRight;
   
+  const contentWidth = (
+    sizeValues.width 
+    - sizeValues.paddingLeft 
+    - sizeValues.paddingRight 
+    - sizeValues.borderLeft 
+    - sizeValues.borderRight
+  );
   const horizontalFrames = [
     {
-      value: marginLeft,
+      value: sizeValues.marginLeft,
       color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     },
     {
-      value: borderLeft,
+      value: sizeValues.borderLeft,
       color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
-      value: paddingLeft,
+      value: sizeValues.paddingLeft,
       color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
@@ -238,30 +231,31 @@ function drawSizeFrames({
       rect: Array(4).fill(0)
     },
     {
-      value: paddingRight,
+      value: sizeValues.paddingRight,
       color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
     {
-      value: borderRight,
+      value: sizeValues.borderRight,
       color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
-      value: marginRight,
+      value: sizeValues.marginRight,
       color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     }
   ];
 
   horizontalFrames.map((item) => item.value).reduce((prev, current, index) => {
+    // Order of code matters in this function
     let currentWithZoom = Math.floor(current * zoomFractionValue);
-    horizontalFrames[index].rect = [prev, 0, currentWithZoom, canvas.height];  // frameWidth
+    horizontalFrames[index].rect = [prev, 0, currentWithZoom, canvas.height];
     return Math.floor(prev + currentWithZoom);
   }, 
     canvasPosition[0]
     - Math.floor(
-      (marginLeft + borderLeft + paddingLeft + (contentWidth * 0.5)) 
+      (sizeValues.marginLeft + sizeValues.borderLeft + sizeValues.paddingLeft + (contentWidth * 0.5)) 
       * zoomFractionValue
     )
   );  
@@ -273,28 +267,26 @@ function drawSizeFrames({
     );
   });
 
-  let height = getFloatValues(computedStyle.getPropertyValue('height'))[0];
-  let paddingTop = getFloatValues(computedStyle.getPropertyValue('padding-top'))[0];
-  let paddingBottom = getFloatValues(computedStyle.getPropertyValue('padding-bottom'))[0];
-  let borderTop = getFloatValues(computedStyle.getPropertyValue('border-top'))[0];
-  let borderBottom = getFloatValues(computedStyle.getPropertyValue('border-bottom'))[0];
-  let marginTop = getFloatValues(computedStyle.getPropertyValue('margin-top'))[0];
-  let marginBottom = getFloatValues(computedStyle.getPropertyValue('margin-bottom'))[0];
-  let contentHeight = height - paddingTop - paddingBottom - borderTop - borderBottom;
-
+  let contentHeight = (
+    sizeValues.height 
+    - sizeValues.paddingTop 
+    - sizeValues.paddingBottom 
+    - sizeValues.borderTop 
+    - sizeValues.borderBottom
+  );
   const verticalFrames = [
     {
-      value: marginTop,
+      value: sizeValues.marginTop,
       color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     },
     {
-      value: borderTop,
+      value: sizeValues.borderTop,
       color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
-      value: paddingTop,
+      value: sizeValues.paddingTop,
       color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
@@ -304,30 +296,31 @@ function drawSizeFrames({
       rect: Array(4).fill(0)
     },
     {
-      value: paddingBottom,
+      value: sizeValues.paddingBottom,
       color: COLORS['size-frame-padding'],
       rect: Array(4).fill(0)
     },
     {
-      value: borderBottom,
+      value: sizeValues.borderBottom,
       color: COLORS['size-frame-border'],
       rect: Array(4).fill(0)
     },
     {
-      value: marginBottom,
+      value: sizeValues.marginBottom,
       color: COLORS['size-frame-margin'],
       rect: Array(4).fill(0)
     }
   ];
 
   verticalFrames.map((item) => item.value).reduce((prev, current, index) => {
+    // Order of code matters in this function
     let currentWithZoom = Math.floor(current * zoomFractionValue);
     verticalFrames[index].rect = [0, prev, canvas.width, currentWithZoom];
     return Math.floor(prev + currentWithZoom);
   }, 
     canvasPosition[1] 
     - Math.floor(
-      (marginTop + borderTop + paddingTop + (contentHeight * 0.5))
+      (sizeValues.marginTop + sizeValues.borderTop + sizeValues.paddingTop + (contentHeight * 0.5))
       * zoomFractionValue
     )
   );  
@@ -350,107 +343,144 @@ function BackgroundCanvas({
 }): ReactElement | null {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const timeoutRef = useRef<NodeJS.Timer | null>(null);
+  const canvasGridRef = useRef<HTMLCanvasElement>(null);
+  const canvasFrameRulersRef = useRef<HTMLCanvasElement>(null);
+  const canvasSizeFramesRef = useRef<HTMLCanvasElement>(null);
+  const [count, setCount] = useState<number>(0);
   const [sizeValues, setSizeValues] = useState<SizeValues>();
-  const { 
-    selectedElementDOMElement, 
+  const [[canvasWidth, canvasHeight], setCanvasSize] = useState<[number, number]>([0, 0]);
+  const {
     selectedElementPosition, 
     isPendingBackgroundRender,
     isGridOn,
-    isRulerOn,
+    isFrameRulersOn,
     zoomFraction,
     isSizeFramesOn,
-    setIsPendingBackgroundRender 
+    dispatch,
   } = useReactIsolatorContext();
 
-  const resizeCanvas = () => {
-    if (canvasRef.current === null || canvasWrapperRef.current === null) {
+  const monitorSizeValues = useCallback(() => {
+    const wrapper = document.getElementById(SELECTED_ELEMENT_WRAPPER_ID);
+    if (wrapper === null || wrapper.firstChild === null)
       return;
-    }
-    let canvasWrapper = canvasWrapperRef.current;
-    let canvas = canvasRef.current;
-    canvas.width = canvasWrapper.offsetWidth;
-    canvas.height = canvasWrapper.offsetHeight;
-  }
 
-  const draw = () => {
-    if (canvasRef.current === null) {
+    const computedStyle = window.getComputedStyle(wrapper.firstChild as Element, null);
+
+    const comparisonSizeValues: SizeValues = {
+      width: getFloatValues(computedStyle.getPropertyValue('width'))[0],
+      paddingLeft: getFloatValues(computedStyle.getPropertyValue('padding-left'))[0],
+      paddingRight: getFloatValues(computedStyle.getPropertyValue('padding-right'))[0],
+      borderLeft: getFloatValues(computedStyle.getPropertyValue('border-left'))[0],
+      borderRight: getFloatValues(computedStyle.getPropertyValue('border-right'))[0],
+      marginLeft: getFloatValues(computedStyle.getPropertyValue('margin-left'))[0],
+      marginRight: getFloatValues(computedStyle.getPropertyValue('margin-right'))[0],
+      height: getFloatValues(computedStyle.getPropertyValue('height'))[0],
+      paddingTop: getFloatValues(computedStyle.getPropertyValue('padding-top'))[0],
+      paddingBottom: getFloatValues(computedStyle.getPropertyValue('padding-bottom'))[0],
+      borderTop: getFloatValues(computedStyle.getPropertyValue('border-top'))[0],
+      borderBottom: getFloatValues(computedStyle.getPropertyValue('border-bottom'))[0],
+      marginTop: getFloatValues(computedStyle.getPropertyValue('margin-top'))[0],
+      marginBottom: getFloatValues(computedStyle.getPropertyValue('margin-bottom'))[0],
+    };
+
+    setSizeValues((prevState) => (
+      (JSON.stringify(prevState) === JSON.stringify(comparisonSizeValues)) 
+      ? prevState
+      : comparisonSizeValues
+    ));
+  }, []);
+
+  useEffect(() => {
+    const timeoutRef = setInterval(monitorSizeValues, 1000 / 12);
+    return () => clearInterval(timeoutRef);
+  }, []);
+
+  const renderGrid = () => {
+    if (canvasRef.current === null)
       return;
-    }
-    let canvas = canvasRef.current;
-    let zoomFractionValue = Number(zoomFraction);
-    let step = Math.floor(zoomFractionValue * UNIT);
 
-    // Drawn background elements
-    {
-      if (isGridOn) {
-        // Draw thin grid
-        drawGrid({ 
-          canvas, 
-          color: `${COLORS['gray-400']}BB`,
-          unit: UNIT,
-          step
-        });
-        // Draw thick grid
-        drawGrid({ 
-          canvas, 
-          color: COLORS['gray-400'],
-          unit: Math.floor(UNIT ** 2),
-          step: Math.floor(step * UNIT)
-        });
-      }
-
-      // Draw frame
-      if (isRulerOn) {
-        drawFrameRulers({ 
-          canvas, 
-          color: COLORS['primary-900'], 
-          constrastColor: COLORS['gray-100'],
-          unit: Math.floor(UNIT ** 2),
-          step: Math.floor(step * UNIT),
-          selectedElementDOMElement,
-          selectedElementPosition,
-        });
-      }
-
-      if (isSizeFramesOn) {
-        // Draw Size rules
-        drawSizeFrames({
-          canvas,
-          selectedElementDOMElement,
-          selectedElementPosition,
-          zoomFractionValue
-        });
-      }
+    const canvas = canvasRef.current;
+    const zoomFractionValue = Number(zoomFraction);
+    const step = Math.floor(zoomFractionValue * UNIT);
+    if (isGridOn) {
+      // Draw thin grid
+      drawGrid({ 
+        canvas, 
+        color: `${COLORS['gray-400']}BB`,
+        unit: UNIT,
+        step
+      });
+      // Draw thick grid
+      drawGrid({ 
+        canvas, 
+        color: COLORS['gray-400'],
+        unit: Math.floor(UNIT ** 2),
+        step: Math.floor(step * UNIT)
+      });
     }
   };
 
-  
-  // To avoid rendering too many times per second
-  const render = () => {
-    if (timeoutRef.current === null) {
-      resizeCanvas();
-      draw();
-      timeoutRef.current = setTimeout(() => {
-        timeoutRef.current = null;
-      }, 30);  
-    }
+  const renderFrameRulers = () => {
+    if (isFrameRulersOn === false || canvasFrameRulersRef.current === null)
+      return;
+
+    const canvas = canvasFrameRulersRef.current;
+    const zoomFractionValue = Number(zoomFraction);
+    const step = Math.floor(zoomFractionValue * UNIT);
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    drawFrameRulers({ 
+      canvas, 
+      color: COLORS['primary-900'], 
+      constrastColor: COLORS['gray-100'],
+      unit: Math.floor(UNIT ** 2),
+      step: Math.floor(step * UNIT)
+    });
   };
 
-  // Translate from React strate to vanilla JS calls
-  useLayoutEffect(() => {
-    render();
-    setIsPendingBackgroundRender(false);
+  useEffect(() => {
+    if (isFrameRulersOn) {
+      renderFrameRulers();
+    }
   }, [
-    isPendingBackgroundRender,
-    isGridOn,
-    isRulerOn,
-    isSizeFramesOn,
-    canvasRef.current, 
-    canvasWrapperRef.current,
-    selectedElementDOMElement,
-    selectedElementPosition,
+    isFrameRulersOn,
     zoomFraction,
+    canvasWidth,
+    canvasHeight,
+  ])
+
+  const renderSizeFrames = () => {
+    if (isSizeFramesOn === false || canvasSizeFramesRef.current === null)
+      return;
+
+    const canvas = canvasSizeFramesRef.current;
+    const zoomFractionValue = Number(zoomFraction);
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    drawSizeFrames({
+      canvas,
+      selectedElementPosition,
+      zoomFractionValue,
+      sizeValues,
+    });
+  };
+
+  useEffect(() => {
+    if (isSizeFramesOn) {
+      monitorSizeValues();
+      renderSizeFrames();
+    }
+  }, [selectedElementPosition?.x, selectedElementPosition?.y, isSizeFramesOn]);
+
+  useEffect(() => {
+    renderSizeFrames();
+  }, [
+    zoomFraction,
+    isSizeFramesOn,
+    canvasWidth,
+    canvasHeight,
+    selectedElementPosition?.x, 
+    selectedElementPosition?.y,
     sizeValues?.width,
     sizeValues?.paddingLeft,
     sizeValues?.paddingRight,
@@ -467,46 +497,17 @@ function BackgroundCanvas({
     sizeValues?.marginBottom,
   ]);
 
-  // Set listener to render if size of window changes
+  const resizeCanvas = () => {
+    if (canvasWrapperRef.current === null) return;
+    setCanvasSize([canvasWrapperRef.current.offsetWidth, canvasWrapperRef.current.offsetHeight]);
+  };
+
   useEffect(() => {
     window.onresize = () => {
-      setIsPendingBackgroundRender(true);
+      resizeCanvas();
     };
+    resizeCanvas();
   }, []);
-
-  useEffect(() => {
-    if (selectedElementDOMElement === null)
-      return;
-
-    const computedStyle = window.getComputedStyle(selectedElementDOMElement, null);
-
-    const timeoutRef = setInterval(() => {
-      const comparisonSizeValues: SizeValues = {
-        width: getFloatValues(computedStyle.getPropertyValue('width'))[0],
-        paddingLeft: getFloatValues(computedStyle.getPropertyValue('padding-left'))[0],
-        paddingRight: getFloatValues(computedStyle.getPropertyValue('padding-right'))[0],
-        borderLeft: getFloatValues(computedStyle.getPropertyValue('border-left'))[0],
-        borderRight: getFloatValues(computedStyle.getPropertyValue('border-right'))[0],
-        marginLeft: getFloatValues(computedStyle.getPropertyValue('margin-left'))[0],
-        marginRight: getFloatValues(computedStyle.getPropertyValue('margin-right'))[0],
-        height: getFloatValues(computedStyle.getPropertyValue('height'))[0],
-        paddingTop: getFloatValues(computedStyle.getPropertyValue('padding-top'))[0],
-        paddingBottom: getFloatValues(computedStyle.getPropertyValue('padding-bottom'))[0],
-        borderTop: getFloatValues(computedStyle.getPropertyValue('border-top'))[0],
-        borderBottom: getFloatValues(computedStyle.getPropertyValue('border-bottom'))[0],
-        marginTop: getFloatValues(computedStyle.getPropertyValue('margin-top'))[0],
-        marginBottom: getFloatValues(computedStyle.getPropertyValue('margin-bottom'))[0],
-      };
-
-      setSizeValues((prevState) => (
-        (JSON.stringify(prevState) === JSON.stringify(comparisonSizeValues)) 
-        ? prevState
-        : comparisonSizeValues
-      ));
-    }, 1000 / 24);
-
-    return () => clearInterval(timeoutRef);
-  }, [selectedElementDOMElement]);
 
   return (
     <div
@@ -516,9 +517,22 @@ function BackgroundCanvas({
       }}
       ref={canvasWrapperRef}
     >
-      <canvas
-        ref={canvasRef}
-      />
+      <canvas 
+        width="100" height="100"
+        style={{position: 'absolute', left: 0, top: 0, zIndex: 0}}
+        ref={canvasGridRef}
+      ></canvas>
+      <canvas 
+        width="100" height="100"
+        style={{position: 'absolute', left: 0, top: 0, zIndex: 1}}
+        ref={canvasFrameRulersRef}
+      ></canvas>
+      <canvas 
+        width="100" height="100"
+        style={{position: 'absolute', left: 0, top: 0, zIndex: 2}}
+        ref={canvasSizeFramesRef}
+      ></canvas>
+
     </div>
   );  
 }

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import logo from 'src/assets/logo.svg';
-import globalStyles from 'src/styles/globals.module.css';
 import styles from 'src/styles/header.module.css';
 
 function Header() {

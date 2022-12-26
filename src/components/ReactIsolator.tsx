@@ -13,14 +13,10 @@ function ReactIsolator({
 }: {
   children?: JSX.Element[] | JSX.Element
 }): JSX.Element {
+  const { dividerWidth, dispatch } = useReactIsolatorContext();
   const dividerRef = useRef<HTMLDivElement>(null);
-  const { 
-    clearItems, 
-    setIsPendingBackgroundRender,
-    dividerWidth, setDividerWith,
-  } = useReactIsolatorContext();
   const [{ mousePositionDelta }, setMousePosition] = 
-    useState<{ 
+    useState<{
       mousePositionX: number, 
       mousePositionY: number, 
       mousePositionDelta: number 
@@ -31,19 +27,16 @@ function ReactIsolator({
   });
 
   useEffect(() => {
-    setDividerWith((prevDividerWidth) => {
-      let proposedDividerWidth = prevDividerWidth + mousePositionDelta;
+    let proposedDividerWidth = dividerWidth + mousePositionDelta;
 
-      if (proposedDividerWidth < DIVIDER_MIN_WIDTH) {
-        proposedDividerWidth = DIVIDER_MIN_WIDTH
-      } else if (proposedDividerWidth > DIVIDER_MAX_WIDTH) {
-        proposedDividerWidth = DIVIDER_MAX_WIDTH
-      }
+    if (proposedDividerWidth < DIVIDER_MIN_WIDTH) {
+      proposedDividerWidth = DIVIDER_MIN_WIDTH
+    } else if (proposedDividerWidth > DIVIDER_MAX_WIDTH) {
+      proposedDividerWidth = DIVIDER_MAX_WIDTH
+    }
 
-      return proposedDividerWidth;
-    });
-
-    setIsPendingBackgroundRender(true);
+    dispatch({ type: 'SET_DIVIDER_WIDTH', payload: proposedDividerWidth });
+    dispatch({ type: 'SET_IS_PENDING_BACKGROUND_RENDER', payload: true });
   }, [mousePositionDelta]);
 
   const onMouseMove: (
@@ -81,7 +74,7 @@ function ReactIsolator({
 
   useEffect(() => {
     return () => {
-      clearItems();
+      dispatch({ type: 'CLEAR_ELEMENTS' });
     }
   }, [])
 
@@ -112,7 +105,7 @@ function ReactIsolatorWrapper({
   children=[]
 }: {
   children?: JSX.Element[] | JSX.Element
-}) { 
+}) {
   return (
     <ReactIsolatorContextProvider>
       <ReactIsolator>

@@ -12,12 +12,12 @@
 /build
 
 # misc
+NOTES
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 .DS_Store
-/node_modules
 .gobble*
 dist
 _actual

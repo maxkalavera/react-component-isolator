@@ -1,3 +1,5 @@
+import type { SizeValues } from 'src/interfaces/BackgroundCanvas.interfaces';
+
 export const ZOOM_FRACTIONS = [
   '0.50', 
   '0.75', 
@@ -70,3 +72,22 @@ export const COLORS = {
 };
 
 export const LOCAL_STORAGE_CONTEXT_ID = '04e7b431-6e23-45df-9314-2798fd459862' as const;
+
+export const SELECTED_ELEMENT_WRAPPER_ID = 'd44e0ece-2d9a-4a52-94eb-097a831359c3' as const;
+
+export const SIZE_VALUES_DEFAULT: SizeValues = {
+  width: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  borderLeft: 0,
+  borderRight: 0,
+  marginLeft: 0,
+  marginRight: 0,
+  height: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+  borderTop: 0,
+  borderBottom: 0,
+  marginTop: 0,
+  marginBottom: 0,
+};

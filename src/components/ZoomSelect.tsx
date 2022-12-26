@@ -6,11 +6,14 @@ import styles from 'src/styles/zoom-select.module.css';
 
 
 function ZoomSelect() {
-  const { zoomFraction, setZoomFraction } = useReactIsolatorContext();
+  const { zoomFraction, dispatch } = useReactIsolatorContext();
 
   const onOptionSelected: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     if (ZOOM_FRACTIONS.find(item => item === event.target.value) !== null) {
-      setZoomFraction(event.target.value as (typeof ZOOM_FRACTIONS)[number])
+      dispatch({ 
+        type: 'SET_ZOOM_FRACTION', 
+        payload: event.target.value as (typeof ZOOM_FRACTIONS)[number] 
+      });
     } else {
       throw `Not valid Zoom fraction select option [${event.target.value}]`;
     }

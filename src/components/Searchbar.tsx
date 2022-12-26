@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import styles from 'src/styles/searchbar.module.css';
 
 function Searchbar ({

@@ -1,7 +1,7 @@
 import React, { MouseEventHandler, useEffect, useRef, useState } from 'react';
 
 import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
-import { BACKGROUND_CANVAS_FRAME_WIDTH, ZOOM_FRACTIONS } from 'src/utils/constants';
+import { BACKGROUND_CANVAS_FRAME_WIDTH, SELECTED_ELEMENT_WRAPPER_ID } from 'src/utils/constants';
 import styles from 'src/styles/grid-area.module.css';
 
 function GridArea ({
@@ -12,10 +12,12 @@ function GridArea ({
   setMousePosition: React.Dispatch<React.SetStateAction<[number, number]>>
 }) {
   const { 
-    selectedElement, setSelectedElementPosition, 
-    selectedElementPosition, setSelectedElementDOMElement,
+    selectedElementID,
+    reactComponentElements,
+    selectedElementPosition,
     zoomFraction,
-    isRulerOn,
+    isFrameRulersOn,
+    dispatch,
   } = useReactIsolatorContext();
   const [isGrabbed, setIsGrabbed] = useState<boolean>(false);
   const container = useRef<HTMLDivElement>(null);
@@ -32,8 +34,8 @@ function GridArea ({
       event.clientY - mousePosition[1]
     ];
     const position = [
-      selectedElementPosition[0] + deltaMousePosition[0],
-      selectedElementPosition[1] + deltaMousePosition[1]
+      selectedElementPosition.x + deltaMousePosition[0],
+      selectedElementPosition.y + deltaMousePosition[1]
     ];
 
     if ( position[0] > 0
@@ -41,7 +43,7 @@ function GridArea ({
       && position[1] > 0
       && position[1] < containerBounds.height
     ) {
-      setSelectedElementPosition([position[0], position[1]]);
+      dispatch({ type: 'SET_SELECTED_ELEMENT_POSITION', payload: { x: position[0], y: position[1] }});
     }
 
     setMousePosition([event.clientX, event.clientY]);
@@ -67,10 +69,10 @@ function GridArea ({
       return;
 
     let containerBounds = container.current.getBoundingClientRect();
-    setSelectedElementPosition([
-      Math.floor(containerBounds.width * 0.5) - BACKGROUND_CANVAS_FRAME_WIDTH,
-      Math.floor(containerBounds.height * 0.5) - BACKGROUND_CANVAS_FRAME_WIDTH
-    ]);
+    dispatch({ type: 'SET_SELECTED_ELEMENT_POSITION', payload: {
+      x: Math.floor(containerBounds.width * 0.5) - BACKGROUND_CANVAS_FRAME_WIDTH,
+      y: Math.floor(containerBounds.height * 0.5) - BACKGROUND_CANVAS_FRAME_WIDTH,
+    }});
   }
 
   useEffect(() => {
@@ -78,16 +80,6 @@ function GridArea ({
       centerItem();
     }
   }, [selectedElementPosition, container.current]);
-
-  // Update selected bounding rect
-  useEffect(() => {
-    if (selectedParentWrapper.current === null) {
-      return;
-    }
-
-    setSelectedElementDOMElement(selectedParentWrapper.current.firstChild as HTMLElement);
-
-  }, [selectedElement, selectedParentWrapper.current]);
 
   return (
     <div
@@ -97,30 +89,31 @@ function GridArea ({
       top: BACKGROUND_CANVAS_FRAME_WIDTH,
       width: `calc(100% - ${BACKGROUND_CANVAS_FRAME_WIDTH}px)`,
       height: `calc(100% - ${BACKGROUND_CANVAS_FRAME_WIDTH}px)`,
-      overflow: isRulerOn ? 'hidden' : 'visible',
+      overflow: isFrameRulersOn ? 'hidden' : 'visible',
     }}
     className={styles['grid-area']}
     onMouseMove={isGrabbed ? onMouseMove : undefined}
     ref={container}
   >
-    { selectedElement !== null && selectedElementPosition !== null ? 
+    { selectedElementID && selectedElementPosition !== null ? 
       <div
         className={`${styles['grid-area__item']} ${isGrabbed ? styles['grid-area__item--grabbed'] : ''}`}
         onMouseDown={onItemSelected}
         style={{
           position: 'absolute',
-          left: selectedElementPosition[0],
-          top:  selectedElementPosition[1],
+          left: selectedElementPosition.x,
+          top:  selectedElementPosition.y,
           transform: `scale(${zoomFraction}) translate(-50%, -50%)`
         }}
       >
         <div 
           className={styles['grid-area__item-content']}
           onMouseDown={(event) => event.stopPropagation()}
+          id={SELECTED_ELEMENT_WRAPPER_ID}
           ref={selectedParentWrapper}
         >
           
-          {selectedElement.jsxElement}
+          {(reactComponentElements.find((item) => item.id === selectedElementID))?.jsxElement}
         </div>
       </div> : null
     }
