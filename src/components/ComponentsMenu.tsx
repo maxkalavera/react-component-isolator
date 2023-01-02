@@ -13,11 +13,11 @@ function ComponentItem({
 }: {
   item: IsolatedItem
 }) {
-  const { selectedElementID, dispatch } = useReactIsolatorContext();
+  const { selectedItemID, dispatch } = useReactIsolatorContext();
   return (
     <div 
-      className={`${styles['components-menu__item']} ${ item.id === selectedElementID ? styles['components-menu__item--selected'] : '' }`}
-      onClick={() => dispatch({ type: 'SET_SELECTED_ELEMENT', payload: item.id })}
+      className={`${styles['components-menu__item']} ${ item.id === selectedItemID ? styles['components-menu__item--selected'] : '' }`}
+      onClick={() => dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: item.id })}
     >
       <Box width={16} height={16} className={styles['components-menu__icon']} />
       <p className={globalStyles['secondary-p']}>{ item.name }</p>
@@ -30,11 +30,11 @@ function ComponentsMenu({
 }: {
   style?: object
 }) {
-  const { reactComponentElements, searchTerm, dispatch  } = useReactIsolatorContext();
+  const { isolatedItems, searchTerm, dispatch  } = useReactIsolatorContext();
 
   const filteredItems = searchTerm.length > 0 
-    ? reactComponentElements.filter((item) => item.name.includes(searchTerm))
-    : reactComponentElements;
+    ? isolatedItems.filter((item) => item.name.includes(searchTerm))
+    : isolatedItems;
   return (
     <div
       className={`${ styles['components-menu__wrapper']}`}

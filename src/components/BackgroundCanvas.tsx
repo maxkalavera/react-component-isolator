@@ -36,12 +36,12 @@ function drawGrid({
   unit?: number,
   step?: number,
 }) {
-  let context = canvas.getContext("2d");
+  const context = canvas.getContext("2d");
   if (context === null) {
     return;
   }
 
-  let initialLinePosition = Math.floor(frameWidth / step) * - step;
+  const initialLinePosition = Math.floor(frameWidth / step) * - step;
   context.beginPath();
   context.lineWidth = lineWidth;
   context.strokeStyle = color;
@@ -75,12 +75,12 @@ function drawFrameRulers({
   unit?: number
   step?: number
 }) {
-  let context = canvas.getContext("2d");
+  const context = canvas.getContext("2d");
   if (context === null) {
     return;
   }
 
-  let halfframeWidthWidth = Math.floor(frameWidth * 0.5);
+  const halfframeWidthWidth = Math.floor(frameWidth * 0.5);
 
   context.beginPath();
   context.save();
@@ -153,25 +153,25 @@ function drawSizeFrames({
   canvas,
   lineWidth=BACKGROUND_CANVAS_LINE_WIDTH,
   frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
-  selectedElementPosition=null,
+  selectedItemPosition=null,
   zoomFractionValue=1.0,
   sizeValues=SIZE_VALUES_DEFAULT,
 }: {
   canvas: HTMLCanvasElement,
   lineWidth?: number,
   frameWidth?: number,
-  selectedElementPosition?: { x: number, y: number } | null,
+  selectedItemPosition?: { x: number, y: number } | null,
   zoomFractionValue?: number,
   sizeValues?: SizeValues,
 }) {
-  let context = canvas.getContext("2d");
+  const context = canvas.getContext("2d");
   if ( 
     context === null
-    || selectedElementPosition === null
+    || selectedItemPosition === null
   ) {
     return;
   }
-  const canvasPosition = [selectedElementPosition.x + frameWidth,  selectedElementPosition.y + frameWidth];
+  const canvasPosition = [selectedItemPosition.x + frameWidth,  selectedItemPosition.y + frameWidth];
 
   context.beginPath();
   context.save();
@@ -342,22 +342,155 @@ function BackgroundCanvas({
   unit?: number,
 }): ReactElement | null {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGridRef = useRef<HTMLCanvasElement>(null);
   const canvasFrameRulersRef = useRef<HTMLCanvasElement>(null);
   const canvasSizeFramesRef = useRef<HTMLCanvasElement>(null);
-  const [count, setCount] = useState<number>(0);
   const [sizeValues, setSizeValues] = useState<SizeValues>();
-  const [[canvasWidth, canvasHeight], setCanvasSize] = useState<[number, number]>([0, 0]);
+  //const [[canvasWidth, canvasHeight], setCanvasSize] = useState<[number, number]>([0, 0]);
   const {
-    selectedElementPosition, 
-    isPendingBackgroundRender,
+    selectedItemPosition,
     isGridOn,
     isFrameRulersOn,
     zoomFraction,
     isSizeFramesOn,
+    canvasSize,
     dispatch,
   } = useReactIsolatorContext();
+
+  const clearCanvas = (canvas: HTMLCanvasElement) => {
+    let context = canvas.getContext("2d");
+    if (context === null) return;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const renderGrid = () => {
+    if (canvasGridRef.current === null)
+      return;
+
+    clearCanvas(canvasGridRef.current);
+    if (isGridOn == false)
+      return;
+
+    const canvas = canvasGridRef.current;
+    const zoomFractionValue = Number(zoomFraction);
+    const step = Math.floor(zoomFractionValue * UNIT);
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+    // Draw thin grid
+    drawGrid({ 
+      canvas, 
+      color: `${COLORS['gray-400']}BB`,
+      unit: UNIT,
+      step
+    });
+    // Draw thick grid
+    drawGrid({ 
+      canvas, 
+      color: COLORS['gray-400'],
+      unit: Math.floor(UNIT ** 2),
+      step: Math.floor(step * UNIT)
+    });
+  };
+
+  useEffect(() => {
+    renderGrid();
+  }, [
+    isGridOn,
+    zoomFraction,
+    canvasSize.width,
+    canvasSize.height,
+  ]);
+
+  const renderFrameRulers = () => {
+    if (canvasFrameRulersRef.current === null)
+      return;
+
+    clearCanvas(canvasFrameRulersRef.current);
+    if(isFrameRulersOn === false)
+      return;
+
+    const canvas = canvasFrameRulersRef.current;
+    const zoomFractionValue = Number(zoomFraction);
+    const step = Math.floor(zoomFractionValue * UNIT);
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+    drawFrameRulers({ 
+      canvas, 
+      color: COLORS['primary-900'], 
+      constrastColor: COLORS['gray-100'],
+      unit: Math.floor(UNIT ** 2),
+      step: Math.floor(step * UNIT)
+    });
+  };
+
+  useEffect(() => {
+    renderFrameRulers();
+  }, [
+    isFrameRulersOn,
+    zoomFraction,
+    canvasSize.width,
+    canvasSize.height,
+  ]);
+
+  const renderSizeFrames = () => {
+    if (canvasSizeFramesRef.current === null)
+      return;
+
+    clearCanvas(canvasSizeFramesRef.current);
+    if(isSizeFramesOn === false)
+      return;
+
+    const canvas = canvasSizeFramesRef.current;
+    const zoomFractionValue = Number(zoomFraction);
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+    drawSizeFrames({
+      canvas,
+      selectedItemPosition,
+      zoomFractionValue,
+      sizeValues,
+    });
+  };
+
+  useEffect(() => {
+    monitorSizeValues();
+    renderSizeFrames();
+  }, [selectedItemPosition?.x, selectedItemPosition?.y, isSizeFramesOn]);
+
+  useEffect(() => {
+    renderSizeFrames();
+  }, [
+    zoomFraction,
+    isSizeFramesOn,
+    canvasSize.width,
+    canvasSize.height,
+    selectedItemPosition?.x, 
+    selectedItemPosition?.y,
+    sizeValues?.width,
+    sizeValues?.paddingLeft,
+    sizeValues?.paddingRight,
+    sizeValues?.borderLeft,
+    sizeValues?.borderRight,
+    sizeValues?.marginLeft,
+    sizeValues?.marginRight,
+    sizeValues?.height,
+    sizeValues?.paddingTop,
+    sizeValues?.paddingBottom,
+    sizeValues?.borderTop,
+    sizeValues?.borderBottom,
+    sizeValues?.marginTop,
+    sizeValues?.marginBottom,
+  ]);
+
+  const resizeCanvas = () => {
+    if (canvasWrapperRef.current === null) return;
+    dispatch({ 
+      type: 'SET_CANVAS_SIZE', 
+      payload: {
+        width: canvasWrapperRef.current.offsetWidth, height: canvasWrapperRef.current.offsetHeight
+      }
+    });
+  };
 
   const monitorSizeValues = useCallback(() => {
     const wrapper = document.getElementById(SELECTED_ELEMENT_WRAPPER_ID);
@@ -394,113 +527,6 @@ function BackgroundCanvas({
     const timeoutRef = setInterval(monitorSizeValues, 1000 / 12);
     return () => clearInterval(timeoutRef);
   }, []);
-
-  const renderGrid = () => {
-    if (canvasRef.current === null)
-      return;
-
-    const canvas = canvasRef.current;
-    const zoomFractionValue = Number(zoomFraction);
-    const step = Math.floor(zoomFractionValue * UNIT);
-    if (isGridOn) {
-      // Draw thin grid
-      drawGrid({ 
-        canvas, 
-        color: `${COLORS['gray-400']}BB`,
-        unit: UNIT,
-        step
-      });
-      // Draw thick grid
-      drawGrid({ 
-        canvas, 
-        color: COLORS['gray-400'],
-        unit: Math.floor(UNIT ** 2),
-        step: Math.floor(step * UNIT)
-      });
-    }
-  };
-
-  const renderFrameRulers = () => {
-    if (isFrameRulersOn === false || canvasFrameRulersRef.current === null)
-      return;
-
-    const canvas = canvasFrameRulersRef.current;
-    const zoomFractionValue = Number(zoomFraction);
-    const step = Math.floor(zoomFractionValue * UNIT);
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    drawFrameRulers({ 
-      canvas, 
-      color: COLORS['primary-900'], 
-      constrastColor: COLORS['gray-100'],
-      unit: Math.floor(UNIT ** 2),
-      step: Math.floor(step * UNIT)
-    });
-  };
-
-  useEffect(() => {
-    if (isFrameRulersOn) {
-      renderFrameRulers();
-    }
-  }, [
-    isFrameRulersOn,
-    zoomFraction,
-    canvasWidth,
-    canvasHeight,
-  ])
-
-  const renderSizeFrames = () => {
-    if (isSizeFramesOn === false || canvasSizeFramesRef.current === null)
-      return;
-
-    const canvas = canvasSizeFramesRef.current;
-    const zoomFractionValue = Number(zoomFraction);
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    drawSizeFrames({
-      canvas,
-      selectedElementPosition,
-      zoomFractionValue,
-      sizeValues,
-    });
-  };
-
-  useEffect(() => {
-    if (isSizeFramesOn) {
-      monitorSizeValues();
-      renderSizeFrames();
-    }
-  }, [selectedElementPosition?.x, selectedElementPosition?.y, isSizeFramesOn]);
-
-  useEffect(() => {
-    renderSizeFrames();
-  }, [
-    zoomFraction,
-    isSizeFramesOn,
-    canvasWidth,
-    canvasHeight,
-    selectedElementPosition?.x, 
-    selectedElementPosition?.y,
-    sizeValues?.width,
-    sizeValues?.paddingLeft,
-    sizeValues?.paddingRight,
-    sizeValues?.borderLeft,
-    sizeValues?.borderRight,
-    sizeValues?.marginLeft,
-    sizeValues?.marginRight,
-    sizeValues?.height,
-    sizeValues?.paddingTop,
-    sizeValues?.paddingBottom,
-    sizeValues?.borderTop,
-    sizeValues?.borderBottom,
-    sizeValues?.marginTop,
-    sizeValues?.marginBottom,
-  ]);
-
-  const resizeCanvas = () => {
-    if (canvasWrapperRef.current === null) return;
-    setCanvasSize([canvasWrapperRef.current.offsetWidth, canvasWrapperRef.current.offsetHeight]);
-  };
 
   useEffect(() => {
     window.onresize = () => {

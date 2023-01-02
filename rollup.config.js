@@ -111,6 +111,7 @@ export default (() => {
               license: pkg.license,
               peerDependencies: pkg.peerDependencies,
               dependencies: {},
+              browser: pkg.browser
             })
           })
         ],

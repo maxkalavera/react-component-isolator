@@ -17,28 +17,33 @@ export const buildThrottlingFunction = (
 
 function useThrottling({
   delay=1000/24,
+  trailing=false,
 }: {
   delay?: number | undefined,
   trailing?: boolean,
 }) {
   const timeoutRef = useRef<NodeJS.Timer | null>(null);
+  const execRef = useRef<Function | null>(null); 
 
   return (exec: Function) => {
-    if (timeoutRef.current === null) {
-      exec();
-      timeoutRef.current = setTimeout(() => {
-        timeoutRef.current = null;
-      }, delay);
-    }  
-  };
-};
+    if (trailing) {
+      if (timeoutRef.current === null) {
+        execRef.current = exec;
+        timeoutRef.current = setTimeout(() => {
+          if (execRef.current !== null)
+            execRef.current();
+          timeoutRef.current = null;
+        }, delay);
+      }  
 
-function useDebouncing({
-  trailing=false,
-}: {
-  trailing?: boolean,
-}) {
-  return () => {
+    } else {
+      if (timeoutRef.current === null) {
+        exec();
+        timeoutRef.current = setTimeout(() => {
+          timeoutRef.current = null;
+        }, delay);
+      }  
+    }
 
   };
 };

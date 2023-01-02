@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
-import GridArea from 'src/components/GridArea';
+import GridAreaItem from 'src/components/GridAreaItem';
 import BackgroundCanvas from 'src/components/BackgroundCanvas';
 import FileRulerFile from 'src/components/icons/FileRulerFile';
 import Grid from 'src/components/icons/Grid';
@@ -9,12 +9,11 @@ import Rulers from 'src/components/icons/Rulers';
 import SwitchButton from 'src/components/SwitchButton';
 import ZoomSelect from 'src/components/ZoomSelect';
 import ZoomBar from 'src/components/ZoomBar';
-import { ZOOM_FRACTIONS, BACKGROUND_CANVAS_FRAME_WIDTH } from 'src/utils/constants';
+import { BACKGROUND_CANVAS_FRAME_WIDTH } from 'src/utils/constants';
 import styles from 'src/styles/visualizer.module.css';
 
 function Visualizer() {
   const { isGridOn, isFrameRulersOn, isSizeFramesOn, zoomFraction, dispatch } = useReactIsolatorContext();
-  const [mousePosition, setMousePosition] = useState<[number, number]>([0.0, 0.0]);
 
   return (
     <div className={styles.visualizer}>
@@ -65,11 +64,18 @@ function Visualizer() {
             top: BACKGROUND_CANVAS_FRAME_WIDTH + 12
           }}
         />
-
-        <GridArea
-          mousePosition={mousePosition}
-          setMousePosition={setMousePosition}
-        />
+        <div
+          style={{
+            position: 'absolute',
+            left: BACKGROUND_CANVAS_FRAME_WIDTH,
+            top: BACKGROUND_CANVAS_FRAME_WIDTH,
+            width: `calc(100% - ${BACKGROUND_CANVAS_FRAME_WIDTH}px)`,
+            height: `calc(100% - ${BACKGROUND_CANVAS_FRAME_WIDTH}px)`,
+          }}
+          className={styles['visualizer__grid-area']}
+        >
+          <GridAreaItem />
+        </div>
       </div>
     </div>
   );

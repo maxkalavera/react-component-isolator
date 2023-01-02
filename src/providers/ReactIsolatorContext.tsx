@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import _ from 'lodash';
+import sha256 from 'crypto-js/sha256';
 
 import localStorageWrapper from 'src/utils/localStorageWrapper';
 import { ZOOM_FRACTIONS, LOCAL_STORAGE_CONTEXT_ID, DIVIDER_DEFAULT_WIDTH } from 'src/utils/constants';
@@ -7,11 +8,12 @@ import { ZOOM_FRACTIONS, LOCAL_STORAGE_CONTEXT_ID, DIVIDER_DEFAULT_WIDTH } from 
 import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
 
 export interface ReactIsolatorContext {
-  selectedElementID: string
-  selectedElementPosition: { x: number, y: number } | null
-  reactComponentElements: IsolatedItem[]
+  selectedItemID: string
+  selectedItemPosition: { x: number, y: number }
+  isolatedItems: IsolatedItem[]
+  isolatedItemsStamp: string
+  canvasSize: { width: number, height: number }
   searchTerm: string
-  isPendingBackgroundRender: boolean
   isGridOn: boolean
   isFrameRulersOn: boolean
   isSizeFramesOn: boolean
@@ -21,22 +23,22 @@ export interface ReactIsolatorContext {
 };
 
 type ReactIsolatorActions = {
-  type: 'SET_SELECTED_ELEMENT',
-  payload:  ReactIsolatorContext['selectedElementID']
+  type: 'SET_SELECTED_ITEM_ID',
+  payload:  ReactIsolatorContext['selectedItemID']
 } | {
-  type: 'SET_SELECTED_ELEMENT_POSITION',
-  payload:  ReactIsolatorContext['selectedElementPosition']
+  type: 'SET_SELECTED_ITEM_POSITION',
+  payload:  ReactIsolatorContext['selectedItemPosition']
 } | {
-  type: 'ADD_ELEMENT',
+  type: 'ADD_ITEM',
   payload:  IsolatedItem
 } | {
-  type: 'CLEAR_ELEMENTS'
+  type: 'CLEAR_ITEMS'
+} | {
+  type: 'SET_CANVAS_SIZE',
+  payload: ReactIsolatorContext['canvasSize']
 } | {
   type: 'SET_SEARCH_TERM',
   payload:  ReactIsolatorContext['searchTerm']
-} | {
-  type: 'SET_IS_PENDING_BACKGROUND_RENDER',
-  payload:  ReactIsolatorContext['isPendingBackgroundRender']
 } | {
   type: 'SET_IS_GRID_ON',
   payload:  ReactIsolatorContext['isGridOn']
@@ -55,16 +57,17 @@ type ReactIsolatorActions = {
 };
 
 const LOCAL_STORAGE_STATE_ATTRIBUTES: Array<keyof ReactIsolatorContext> = [
-  'selectedElementID', 'selectedElementPosition', 'searchTerm', 'isPendingBackgroundRender',
-  'isGridOn', 'isFrameRulersOn', 'isSizeFramesOn', 'dividerWidth', 'zoomFraction'
+  'selectedItemID', 'selectedItemPosition', 'searchTerm', 'isGridOn', 'isFrameRulersOn', 
+  'isSizeFramesOn', 'dividerWidth', 'zoomFraction'
 ];
 
 const defaultState: ReactIsolatorContext = {
-  selectedElementID: '',
-  selectedElementPosition: null,
-  reactComponentElements: [],
+  selectedItemID: '',
+  selectedItemPosition: {x: 0, y: 0},
+  isolatedItems: [],
+  isolatedItemsStamp: '',
+  canvasSize: { width: 0, height: 0},
   searchTerm: '',
-  isPendingBackgroundRender: true,
   isGridOn: true,
   isFrameRulersOn: true,
   isSizeFramesOn: true,
@@ -88,23 +91,31 @@ function ReactIsolatorContextProvider({
     const clone = _.cloneDeep(state);
 
     switch(action.type) {
-      case 'SET_SELECTED_ELEMENT': 
-        clone.selectedElementID = action.payload;
+      case 'SET_SELECTED_ITEM_ID': 
+        clone.selectedItemID = action.payload;
+        clone.selectedItemPosition = {
+          x: Math.floor(clone.canvasSize.width / 2), 
+          y: Math.floor(clone.canvasSize.height / 2)
+        };
         break;
-      case 'SET_SELECTED_ELEMENT_POSITION': 
-        clone.selectedElementPosition = action.payload;
+      case 'SET_SELECTED_ITEM_POSITION':
+        clone.selectedItemPosition = action.payload;
         break;
-      case 'ADD_ELEMENT': 
-        clone.reactComponentElements = state.reactComponentElements.concat(action.payload);
+      case 'ADD_ITEM': 
+        const item = action.payload;
+        item.id = sha256(`${item.jsxElement.type.toString()}${state.isolatedItems.length}`).toString();
+        clone.isolatedItems = state.isolatedItems.concat(item);
+        clone.isolatedItemsStamp = sha256(state.isolatedItems.map((item) => item.id).toString()).toString();
         break;
-      case 'CLEAR_ELEMENTS': 
-        clone.reactComponentElements = [];
+      case 'CLEAR_ITEMS': 
+        clone.isolatedItems = [];
+        clone.isolatedItemsStamp = sha256(state.isolatedItems.map((item) => item.id).toString()).toString();
+        break;
+      case 'SET_CANVAS_SIZE':
+        clone.canvasSize = action.payload;
         break;
       case 'SET_SEARCH_TERM': 
         clone.searchTerm = action.payload;
-        break;
-      case 'SET_IS_PENDING_BACKGROUND_RENDER': 
-        clone.isPendingBackgroundRender = action.payload;
         break;
       case 'SET_IS_GRID_ON': 
         clone.isGridOn = action.payload;

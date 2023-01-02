@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 
@@ -14,10 +13,10 @@ function IsolatedItem({
 
   useEffect(() => {
     dispatch({
-      type: 'ADD_ELEMENT',
+      type: 'ADD_ITEM',
       payload: {
         name,
-        id: uuidv4(),
+        id: '',  // ID will be asigned later by the dispatcher of the ReactIsolatorContext
         jsxElement: element,
       }
     });

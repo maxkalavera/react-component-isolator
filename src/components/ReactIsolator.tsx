@@ -36,7 +36,6 @@ function ReactIsolator({
     }
 
     dispatch({ type: 'SET_DIVIDER_WIDTH', payload: proposedDividerWidth });
-    dispatch({ type: 'SET_IS_PENDING_BACKGROUND_RENDER', payload: true });
   }, [mousePositionDelta]);
 
   const onMouseMove: (
@@ -74,7 +73,7 @@ function ReactIsolator({
 
   useEffect(() => {
     return () => {
-      dispatch({ type: 'CLEAR_ELEMENTS' });
+      dispatch({ type: 'CLEAR_ITEMS' });
     }
   }, [])
 
