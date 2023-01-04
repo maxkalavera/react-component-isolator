@@ -1,5 +1,6 @@
 import React, { MouseEventHandler, useEffect, useState, useRef, useCallback } from 'react';
 
+import { useThrottling } from 'src/utils/utils';
 import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import { SELECTED_ELEMENT_WRAPPER_ID } from 'src/utils/constants';
 import styles from 'src/styles/grid-area-item.module.css';
@@ -8,55 +9,58 @@ import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
 
 function GridAreaItem() {
     const { 
-        selectedItemID,
+        //selectedItemID,
         isolatedItems,
-        isolatedItemsStamp,
+        //isolatedItemsStamp,
         selectedItemPosition,
+        selectedItemIndex,
         zoomFraction,
         dispatch,
     } = useReactIsolatorContext();
     const mousePosRef = useRef<[number, number]>([0.0, 0.0]);
     const [isGrabbed, setIsGrabbed] = useState<boolean>(false);
-    const [isolatedItem, setIsolatedItem] = useState<IsolatedItem>();
+    //const [isolatedItem, setIsolatedItem] = useState<IsolatedItem>();
 
-    const onMouseMove = useCallback((event: globalThis.MouseEvent) => {
-      console.log('selectedItemPosition =>', selectedItemPosition);
-      const deltaMousePosition = [
-        event.clientX - mousePosRef.current[0],
-        event.clientY - mousePosRef.current[1]
-      ];
+    const onMouseMove = useCallback(useThrottling((event: globalThis.MouseEvent) => {
       dispatch({
-        type: 'SET_SELECTED_ITEM_POSITION',
+        type: 'SLIDE_SELECTED_ITEM_POSITION',
         payload: { 
-          x: selectedItemPosition.x + deltaMousePosition[0], 
-          y: selectedItemPosition.y + deltaMousePosition[1] 
+          deltaX: event.clientX - mousePosRef.current[0], 
+          deltaY: event.clientY - mousePosRef.current[1] 
         }
       });
       mousePosRef.current = [event.clientX, event.clientY]
-    }, [selectedItemPosition.x, selectedItemPosition.y, mousePosRef.current, dispatch]);
+    }, 1000/32), [selectedItemPosition.x, selectedItemPosition.y, mousePosRef.current, dispatch]);
   
     const onItemSelected: MouseEventHandler<HTMLElement> = useCallback((event) => {
-      if (!isGrabbed) {
-        mousePosRef.current = [event.clientX, event.clientY]
-        document.onmouseup = () => {
-          document.onmouseup = null;
-          document.onmousemove = null;
-          setIsGrabbed(false);
-        };
-        setIsGrabbed(true);
-      }
-    }, [isGrabbed, setIsGrabbed]);
+      mousePosRef.current = [event.clientX, event.clientY];
+      setIsGrabbed(true);
+    }, [setIsGrabbed]);
 
     useEffect(() => {
       // When is grabbed flag is on update onmousemove event listener
       if (isGrabbed) {
         document.onmousemove = onMouseMove;
+      } else {
+        document.onmousemove = null;
       }
-    }, [isGrabbed, selectedItemPosition.x, selectedItemPosition.y, mousePosRef.current, dispatch]);
+    }, [isGrabbed, dispatch]);
 
     useEffect(() => {
-        setIsolatedItem((isolatedItems.find((item) => item.id === selectedItemID)));
-    }, [selectedItemID, isolatedItems, isolatedItemsStamp]);
+      document.onmouseleave = document.onmouseup = () => {
+        setIsGrabbed(false);
+      };
+
+      return () => {
+        document.onmousemove = null;
+        document.onmouseup = null;
+        document.onmousemove = null;
+      };
+    }, [setIsGrabbed]);
+
+    if(selectedItemIndex === -1) {
+      return null;      
+    }
 
     return (
         <div
@@ -71,10 +75,11 @@ function GridAreaItem() {
       >
         <div 
           className={styles['grid-area-item__content']}
-          onMouseDown={(event) => event.stopPropagation()}
           id={SELECTED_ELEMENT_WRAPPER_ID}
+          onMouseDown={(event) => event.stopPropagation()}
+          onMouseMove={(event) => event.stopPropagation()}
         >
-          { isolatedItem?.jsxElement }
+          { isolatedItems[selectedItemIndex].jsxElement }
         </div>
       </div>
     );

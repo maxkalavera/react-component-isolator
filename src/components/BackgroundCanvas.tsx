@@ -336,19 +336,15 @@ function drawSizeFrames({
 /******************************************************************************
 * Component
 ******************************************************************************/
-function BackgroundCanvas({
-  unit=UNIT,
-}: {
-  unit?: number,
-}): ReactElement | null {
+function BackgroundCanvas(): ReactElement | null {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasGridRef = useRef<HTMLCanvasElement>(null);
   const canvasFrameRulersRef = useRef<HTMLCanvasElement>(null);
   const canvasSizeFramesRef = useRef<HTMLCanvasElement>(null);
   const [sizeValues, setSizeValues] = useState<SizeValues>();
-  //const [[canvasWidth, canvasHeight], setCanvasSize] = useState<[number, number]>([0, 0]);
   const {
     selectedItemPosition,
+    selectedItemIndex,
     isGridOn,
     isFrameRulersOn,
     zoomFraction,
@@ -453,11 +449,13 @@ function BackgroundCanvas({
   };
 
   useEffect(() => {
+    if (selectedItemIndex === -1) return;
     monitorSizeValues();
     renderSizeFrames();
-  }, [selectedItemPosition?.x, selectedItemPosition?.y, isSizeFramesOn]);
+  }, [selectedItemPosition?.x, selectedItemPosition?.y, isSizeFramesOn, selectedItemIndex]);
 
   useEffect(() => {
+    if (selectedItemIndex === -1) return;
     renderSizeFrames();
   }, [
     zoomFraction,
@@ -480,6 +478,7 @@ function BackgroundCanvas({
     sizeValues?.borderBottom,
     sizeValues?.marginTop,
     sizeValues?.marginBottom,
+    selectedItemIndex,
   ]);
 
   const resizeCanvas = () => {
@@ -524,9 +523,10 @@ function BackgroundCanvas({
   }, []);
 
   useEffect(() => {
+    if (selectedItemIndex === -1) return;
     const timeoutRef = setInterval(monitorSizeValues, 1000 / 12);
     return () => clearInterval(timeoutRef);
-  }, []);
+  }, [selectedItemIndex]);
 
   useEffect(() => {
     window.onresize = () => {

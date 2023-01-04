@@ -9,6 +9,7 @@ import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
 
 export interface ReactIsolatorContext {
   selectedItemID: string
+  selectedItemIndex: number
   selectedItemPosition: { x: number, y: number }
   isolatedItems: IsolatedItem[]
   isolatedItemsStamp: string
@@ -28,6 +29,9 @@ type ReactIsolatorActions = {
 } | {
   type: 'SET_SELECTED_ITEM_POSITION',
   payload:  ReactIsolatorContext['selectedItemPosition']
+} | {
+  type: 'SLIDE_SELECTED_ITEM_POSITION',
+  payload:  { deltaX: number, deltaY: number }
 } | {
   type: 'ADD_ITEM',
   payload:  IsolatedItem
@@ -63,6 +67,7 @@ const LOCAL_STORAGE_STATE_ATTRIBUTES: Array<keyof ReactIsolatorContext> = [
 
 const defaultState: ReactIsolatorContext = {
   selectedItemID: '',
+  selectedItemIndex: -1,
   selectedItemPosition: {x: 0, y: 0},
   isolatedItems: [],
   isolatedItemsStamp: '',
@@ -90,9 +95,23 @@ function ReactIsolatorContextProvider({
   const [state, dispatch] = useReducer((state: ReactIsolatorContext, action: ReactIsolatorActions) => {
     const clone = _.cloneDeep(state);
 
+    const restrainSelectedItemPosition = () => {
+        // Force selected item position update to be inside de canvas
+        if (clone.selectedItemPosition.x < 0) {
+          clone.selectedItemPosition.x = 0;
+        } else if (clone.selectedItemPosition.x > clone.canvasSize.width) {
+          clone.selectedItemPosition.x = clone.canvasSize.width;
+        } else if (clone.selectedItemPosition.y < 0) {
+          clone.selectedItemPosition.y = 0;
+        } else if (clone.selectedItemPosition.y > clone.canvasSize.height) {
+          clone.selectedItemPosition.y = clone.canvasSize.height;
+        }
+    }
+
     switch(action.type) {
-      case 'SET_SELECTED_ITEM_ID': 
+      case 'SET_SELECTED_ITEM_ID':
         clone.selectedItemID = action.payload;
+        clone.selectedItemIndex = clone.isolatedItems.findIndex((item) => item.id === clone.selectedItemID);
         clone.selectedItemPosition = {
           x: Math.floor(clone.canvasSize.width / 2), 
           y: Math.floor(clone.canvasSize.height / 2)
@@ -100,19 +119,28 @@ function ReactIsolatorContextProvider({
         break;
       case 'SET_SELECTED_ITEM_POSITION':
         clone.selectedItemPosition = action.payload;
+        restrainSelectedItemPosition();
+        break;
+      case 'SLIDE_SELECTED_ITEM_POSITION':
+        clone.selectedItemPosition.x += action.payload.deltaX;
+        clone.selectedItemPosition.y += action.payload.deltaY;
+        restrainSelectedItemPosition();
         break;
       case 'ADD_ITEM': 
         const item = action.payload;
         item.id = sha256(`${item.jsxElement.type.toString()}${state.isolatedItems.length}`).toString();
         clone.isolatedItems = state.isolatedItems.concat(item);
         clone.isolatedItemsStamp = sha256(state.isolatedItems.map((item) => item.id).toString()).toString();
+        clone.selectedItemIndex = clone.isolatedItems.findIndex((item) => item.id === clone.selectedItemID);
         break;
       case 'CLEAR_ITEMS': 
         clone.isolatedItems = [];
         clone.isolatedItemsStamp = sha256(state.isolatedItems.map((item) => item.id).toString()).toString();
+        clone.selectedItemIndex = clone.isolatedItems.findIndex((item) => item.id === clone.selectedItemID);
         break;
       case 'SET_CANVAS_SIZE':
         clone.canvasSize = action.payload;
+        restrainSelectedItemPosition();
         break;
       case 'SET_SEARCH_TERM': 
         clone.searchTerm = action.payload;
@@ -133,7 +161,6 @@ function ReactIsolatorContextProvider({
         clone.zoomFraction = action.payload;
         break;
     }
-  
     return clone;
   }, 
     Object.assign(defaultState, localStorageWrapper.get(LOCAL_STORAGE_CONTEXT_ID, {}))

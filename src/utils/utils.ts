@@ -1,44 +1,24 @@
 import { useRef } from "react";
 
-export const buildThrottlingFunction = (
-  exec: Function,
-  ref: React.MutableRefObject<NodeJS.Timer | null>,
-  delay: number | undefined = 1000/24
-) => {
-  return () => {
-    if (ref.current === null) {
-      exec();
-      ref.current = setTimeout(() => {
-        ref.current = null;
-      }, delay);
-    }  
-  };
-};
-
-function useThrottling({
-  delay=1000/24,
-  trailing=false,
-}: {
-  delay?: number | undefined,
-  trailing?: boolean,
-}) {
+export function useThrottling(
+  func: Function,
+  delay: number | undefined=1000/24,
+  trailing: boolean=false,
+) {
   const timeoutRef = useRef<NodeJS.Timer | null>(null);
-  const execRef = useRef<Function | null>(null); 
 
-  return (exec: Function) => {
+  return (...args: any[]) => {
     if (trailing) {
       if (timeoutRef.current === null) {
-        execRef.current = exec;
         timeoutRef.current = setTimeout(() => {
-          if (execRef.current !== null)
-            execRef.current();
+          func(...args);
           timeoutRef.current = null;
         }, delay);
       }  
 
     } else {
       if (timeoutRef.current === null) {
-        exec();
+        func(...args);
         timeoutRef.current = setTimeout(() => {
           timeoutRef.current = null;
         }, delay);
