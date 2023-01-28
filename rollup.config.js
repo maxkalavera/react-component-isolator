@@ -5,7 +5,6 @@ import filesize from 'rollup-plugin-filesize';
 import typescript from 'rollup-plugin-typescript2';
 import autoprefixer from 'autoprefixer';
 import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
 import { cleandir } from "rollup-plugin-cleandir";
 import includePaths from 'rollup-plugin-includepaths';
 import svg from 'rollup-plugin-svg';
@@ -13,14 +12,16 @@ import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import generatePackageJson from 'rollup-plugin-generate-package-json';
 
 export default (() => {
+  let outputDir = ''
   switch(process.env.NODE_ENV) {
     // Production settings
     case 'production':
+      outputDir = './dist'
       return {
         preserveModules: true,
         input: 'src/main.tsx',
         output: {
-          dir: './dist',
+          dir: outputDir,
           format: 'cjs',
           name: 'react-component-isolator',
           preserveModules: true,
@@ -42,7 +43,7 @@ export default (() => {
           typescript({ 
             tsconfig: "./tsconfig.json",
             declaration: true,
-            declarationDir: './dist',
+            declarationDir: outputDir,
           }),
           postcss({
             plugins: [autoprefixer()],
@@ -67,11 +68,12 @@ export default (() => {
 
     // Development settings
     default:
+      outputDir = './example_project/externals/react-isolator'
       return {
         preserveModules: true,
         input: 'src/main.tsx',
         output: {
-          dir: './example_project/externals/react-isolator',
+          dir: outputDir,
           format: 'cjs',
           name: 'react-component-isolator',
           preserveModules: true,
@@ -93,7 +95,7 @@ export default (() => {
           typescript({ 
             tsconfig: "./tsconfig.json",
             declaration: true,
-            declarationDir: './example_project/externals/react-isolator',
+            declarationDir: outputDir,
           }),
           postcss({
             plugins: [autoprefixer()],
@@ -115,6 +117,6 @@ export default (() => {
             })
           })
         ],
-      };
+      }
   };
 })();

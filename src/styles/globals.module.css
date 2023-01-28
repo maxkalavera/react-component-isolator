@@ -49,6 +49,24 @@
   --content-container-padding: var(--gap-md);
   --content-container-min-height: calc(100vh - var(--header-height) - var(--footer-height));
   --content-height: calc(var(--content-container-min-height) - calc(2 * var(--content-container-padding)));
+
+  --divider-default-width: 191px;
+  --divider-min-width: 0px;
+  --divider-max-width: 1024px;
+  --background-canvas-size-frames-line-width: 2px;
+  --background-canvas-frame-ruler-width: 24px;
+  --background-canvas-frame-ruler-line-width: 2px;
+  --background-canvas-thin-lines-width: 1px;
+  --background-canvas-thick-lines-width: 2px;
+  --background-canvas-frame-ruler: var(--primary-900);
+  --background-canvas-frame-contrast: var(--gray-100);
+  --background-canvas-grid-thin-lines: var(--gray-100);
+  --background-canvas-grid-thick-lines: var(--gray-200);
+  --background-canvas-size-frame-position-line: #ff524a50;
+  --background-canvas-size-frame-margin: #1ee19650;
+  --background-canvas-size-frame-border: #e1341e50;
+  --background-canvas-size-frame-padding: #1e6ae150;
+  --background-canvas-size-frame-content: #1FA9CF50;
 }
 
 .no-margin body, 
@@ -61,7 +79,6 @@
 .no-margin small {
   margin: 0px;
 }
-
 
 .fill-height-available body,
 .fill-height-available html {

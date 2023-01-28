@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-
-import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
+import React from 'react';
 
 import Searchbar from 'src/components/Searchbar';
 import Box from 'src/components/icons/Box';
-import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import globalStyles from 'src/styles/globals.module.css';
 import styles from 'src/styles/components-menu.module.css';
+import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
+
+import type IsolatedItem from 'src/components/IsolatedItem.d';
 
 function ComponentItem({
   item,

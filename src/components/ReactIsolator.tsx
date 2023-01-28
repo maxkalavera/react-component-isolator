@@ -1,18 +1,20 @@
 import React, { useEffect, useState, MouseEventHandler, useRef } from 'react';
 
-import { DIVIDER_MIN_WIDTH, DIVIDER_MAX_WIDTH } from 'src/utils/constants';
+import { ROOT_ELEMENT_ID } from 'src/utils/constants';
 import { ReactIsolatorContextProvider, useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
 import Visualizer from 'src/components/Visualizer';
 import ComponentsMenu from 'src/components/ComponentsMenu';
 import Header from 'src/components/Header';
 import globalStyles from 'src/styles/globals.module.css';
 import styles from 'src/styles/react-isolator.module.css';
+import useComputedStyle from 'src/hooks/useComputedStyle';
 
 function ReactIsolator({
   children=[]
 }: {
   children?: JSX.Element[] | JSX.Element
 }): JSX.Element {
+  const computedStyle = useComputedStyle();
   const { dividerWidth, dispatch } = useReactIsolatorContext();
   const dividerRef = useRef<HTMLDivElement>(null);
   const [{ mousePositionDelta }, setMousePosition] = 
@@ -27,25 +29,14 @@ function ReactIsolator({
   });
 
   useEffect(() => {
-    let proposedDividerWidth = dividerWidth + mousePositionDelta;
+    dispatch({ 
+      type: 'SLIDE_DIVIDER', 
+      payload: mousePositionDelta
+    });
+  }, [mousePositionDelta, computedStyle]);
 
-    if (proposedDividerWidth < DIVIDER_MIN_WIDTH) {
-      proposedDividerWidth = DIVIDER_MIN_WIDTH
-    } else if (proposedDividerWidth > DIVIDER_MAX_WIDTH) {
-      proposedDividerWidth = DIVIDER_MAX_WIDTH
-    }
-
-    dispatch({ type: 'SET_DIVIDER_WIDTH', payload: proposedDividerWidth });
-  }, [mousePositionDelta]);
-
-  const onMouseMove: (
-    ((this: GlobalEventHandlers, ev: MouseEvent) => any) 
-    & ((this: Window, ev: MouseEvent) => any)
-  ) = (event) => {
-    if (dividerRef.current === null) {
-      return;
-    }
-
+  const onMouseMove= (event: MouseEvent) => {
+    if (dividerRef.current === null) return;
     setMousePosition((prevState) => ({
       mousePositionX: event.clientX, 
       mousePositionY: event.clientY, 
@@ -61,14 +52,13 @@ function ReactIsolator({
       mousePositionY: event.clientY, 
     }));
 
-    window.onmousemove = onMouseMove;
-    window.onmouseup = onDividerReleased;
-    window.document.onmouseleave = onDividerReleased;
+    document.onmousemove = onMouseMove;
+    document.onmouseup = document.onmouseleave = onDividerReleased;
   }
 
   const onDividerReleased = () => {
-    window.onmousemove = null; 
-    window.onmouseup = null;
+    document.onmousemove = null; 
+    document.onmouseup = null;
   }
 
   useEffect(() => {
@@ -79,6 +69,7 @@ function ReactIsolator({
 
   return (
     <div 
+    id={ROOT_ELEMENT_ID}
       className={`${globalStyles['vars']} ${styles['react-isolator']}`}
     >
       { children }

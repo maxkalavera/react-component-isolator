@@ -8,31 +8,23 @@ import React, {
 
 import { getFloatValues } from 'src/utils/string';
 import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
+import { SELECTED_ELEMENT_WRAPPER_ID, SIZE_VALUES_DEFAULT} from 'src/utils/constants';
+import useComputedStyle from "src/hooks/useComputedStyle";
+import { BACKGROUND_CANVAS_GRID_STEP_UNIT } from "src/utils/constants";
 
-import {
-  BACKGROUND_CANVAS_LINE_WIDTH,
-  BACKGROUND_CANVAS_THIN_LINE_WIDTH,
-  BACKGROUND_CANVAS_FRAME_WIDTH,
-  COLORS,
-  SELECTED_ELEMENT_WRAPPER_ID,
-  SIZE_VALUES_DEFAULT,
-} from 'src/utils/constants';
-
-import type { SizeValues } from 'src/interfaces/BackgroundCanvas.interfaces';
-
-const UNIT = 10;
+import type { SizeValues } from 'src/components/BackgroundCanvas.d';
 
 function drawGrid({
   canvas,
-  color=COLORS['gray-400'],
-  lineWidth=BACKGROUND_CANVAS_THIN_LINE_WIDTH,
-  frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
-  step=UNIT,
+  color,
+  lineWidth,
+  frameWidth,
+  step=BACKGROUND_CANVAS_GRID_STEP_UNIT,
 }: {
   canvas: HTMLCanvasElement,
-  color?: string,
-  lineWidth?: number,
-  frameWidth?: number,
+  color: string,
+  lineWidth: number,
+  frameWidth: number,
   unit?: number,
   step?: number,
 }) {
@@ -60,34 +52,30 @@ function drawGrid({
 
 function drawFrameRulers({
   canvas,
-  color=COLORS['primary-900'],
-  constrastColor=COLORS['gray-100'],
-  lineWidth=BACKGROUND_CANVAS_THIN_LINE_WIDTH,
-  frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
-  unit=Math.floor(UNIT) ** 2,
-  step=Math.floor(UNIT) ** 2,
+  computedStyle,
+  unit,
+  step,
 }: {
   canvas: HTMLCanvasElement
-  color?: string
-  constrastColor?: string
-  lineWidth?: number
-  frameWidth?: number
-  unit?: number
-  step?: number
+  computedStyle: CSSStyleDeclaration,
+  unit: number
+  step: number
 }) {
   const context = canvas.getContext("2d");
   if (context === null) {
     return;
   }
 
+  const frameWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width'));
+  const lineWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-line-width'));
   const halfframeWidthWidth = Math.floor(frameWidth * 0.5);
 
   context.beginPath();
   context.save();
   context.lineWidth = frameWidth;
-  context.strokeStyle = color;
+  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-frame-ruler');
   context.shadowBlur = 10;
-  context.shadowColor = COLORS['gray-900'];
+  context.shadowColor = computedStyle.getPropertyValue('--gray-900');
 
   // Vertical frame
   context.moveTo(0, halfframeWidthWidth);
@@ -104,7 +92,7 @@ function drawFrameRulers({
   context.beginPath();
   context.save();
   context.lineWidth = lineWidth;
-  context.strokeStyle = constrastColor;
+  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-frame-contrast');
 
   // Vertical ones
   for (let i = step; i < canvas.height; i += step) {
@@ -118,7 +106,15 @@ function drawFrameRulers({
     context.lineTo(frameWidth + i, frameWidth);
   }
 
+  context.stroke();
+  context.restore();
+
   // Corner lines
+  context.beginPath();
+  context.save();
+  context.lineWidth = 1;
+  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-frame-contrast');
+
   context.moveTo(0, frameWidth);
   context.lineTo(frameWidth, frameWidth);
   context.moveTo(frameWidth, 0);
@@ -127,11 +123,12 @@ function drawFrameRulers({
   context.stroke();
   context.restore();
 
+  // Measure lines and text
   context.beginPath();
   context.textAlign = 'center';
   context.font = '10px Roboto';
   context.textBaseline = 'middle';
-  context.fillStyle = constrastColor;
+  context.fillStyle = computedStyle.getPropertyValue('--background-canvas-frame-contrast');
   // Vertical number text in measure lines
   for (let i = 1; (i * step) < canvas.height; i += 1) {
     context.save();
@@ -151,15 +148,13 @@ function drawFrameRulers({
 
 function drawSizeFrames({
   canvas,
-  lineWidth=BACKGROUND_CANVAS_LINE_WIDTH,
-  frameWidth=BACKGROUND_CANVAS_FRAME_WIDTH,
+  computedStyle,
   selectedItemPosition=null,
   zoomFractionValue=1.0,
   sizeValues=SIZE_VALUES_DEFAULT,
 }: {
   canvas: HTMLCanvasElement,
-  lineWidth?: number,
-  frameWidth?: number,
+  computedStyle: CSSStyleDeclaration,
   selectedItemPosition?: { x: number, y: number } | null,
   zoomFractionValue?: number,
   sizeValues?: SizeValues,
@@ -171,12 +166,14 @@ function drawSizeFrames({
   ) {
     return;
   }
+  const lineWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-size-frames-line-width'));
+  const frameWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width'));
   const canvasPosition = [selectedItemPosition.x + frameWidth,  selectedItemPosition.y + frameWidth];
 
   context.beginPath();
   context.save();
   context.lineWidth = Math.floor(lineWidth * zoomFractionValue);
-  context.strokeStyle = COLORS['size-frame-position-line'];
+  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-size-frame-position-line');
 
   context.moveTo(canvasPosition[0], 0);
   context.lineTo(canvasPosition[0], canvas.height);
@@ -212,37 +209,37 @@ function drawSizeFrames({
   const horizontalFrames = [
     {
       value: sizeValues.marginLeft,
-      color: COLORS['size-frame-margin'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.borderLeft,
-      color: COLORS['size-frame-border'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.paddingLeft,
-      color: COLORS['size-frame-padding'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
       rect: Array(4).fill(0)
     },
     {
       value: contentWidth,
-      color: COLORS['size-frame-content'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-content'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.paddingRight,
-      color: COLORS['size-frame-padding'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.borderRight,
-      color: COLORS['size-frame-border'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.marginRight,
-      color: COLORS['size-frame-margin'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
       rect: Array(4).fill(0)
     }
   ];
@@ -277,37 +274,37 @@ function drawSizeFrames({
   const verticalFrames = [
     {
       value: sizeValues.marginTop,
-      color: COLORS['size-frame-margin'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.borderTop,
-      color: COLORS['size-frame-border'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.paddingTop,
-      color: COLORS['size-frame-padding'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
       rect: Array(4).fill(0)
     },
     {
       value: contentHeight,
-      color: COLORS['size-frame-content'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-content'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.paddingBottom,
-      color: COLORS['size-frame-padding'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.borderBottom,
-      color: COLORS['size-frame-border'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
       rect: Array(4).fill(0)
     },
     {
       value: sizeValues.marginBottom,
-      color: COLORS['size-frame-margin'],
+      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
       rect: Array(4).fill(0)
     }
   ];
@@ -350,8 +347,10 @@ function BackgroundCanvas(): ReactElement | null {
     zoomFraction,
     isSizeFramesOn,
     canvasSize,
+    dividerWidth,
     dispatch,
   } = useReactIsolatorContext();
+  const computedStyle = useComputedStyle();
 
   const clearCanvas = (canvas: HTMLCanvasElement) => {
     let context = canvas.getContext("2d");
@@ -360,31 +359,35 @@ function BackgroundCanvas(): ReactElement | null {
   };
 
   const renderGrid = () => {
-    if (canvasGridRef.current === null)
+    if (canvasGridRef.current === null || computedStyle === undefined)
       return;
 
     clearCanvas(canvasGridRef.current);
-    if (isGridOn == false)
+    if (isGridOn === false)
       return;
 
     const canvas = canvasGridRef.current;
     const zoomFractionValue = Number(zoomFraction);
-    const step = Math.floor(zoomFractionValue * UNIT);
+    const step = Math.floor(zoomFractionValue * BACKGROUND_CANVAS_GRID_STEP_UNIT);
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
     // Draw thin grid
     drawGrid({ 
-      canvas, 
-      color: `${COLORS['gray-400']}BB`,
-      unit: UNIT,
+      canvas,
+      color: computedStyle.getPropertyValue('--background-canvas-grid-thin-lines'),
+      lineWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-thin-lines-width')),
+      frameWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width')),
+      unit: BACKGROUND_CANVAS_GRID_STEP_UNIT,
       step
     });
     // Draw thick grid
     drawGrid({ 
       canvas, 
-      color: COLORS['gray-400'],
-      unit: Math.floor(UNIT ** 2),
-      step: Math.floor(step * UNIT)
+      color: computedStyle.getPropertyValue('--background-canvas-grid-thick-lines'),
+      lineWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-thick-lines-width')),
+      frameWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width')),
+      unit: Math.floor(BACKGROUND_CANVAS_GRID_STEP_UNIT ** 2),
+      step: Math.floor(step * BACKGROUND_CANVAS_GRID_STEP_UNIT)
     });
   };
 
@@ -395,10 +398,11 @@ function BackgroundCanvas(): ReactElement | null {
     zoomFraction,
     canvasSize.width,
     canvasSize.height,
+    computedStyle,
   ]);
 
   const renderFrameRulers = () => {
-    if (canvasFrameRulersRef.current === null)
+    if (canvasFrameRulersRef.current === null || computedStyle === undefined)
       return;
 
     clearCanvas(canvasFrameRulersRef.current);
@@ -407,15 +411,14 @@ function BackgroundCanvas(): ReactElement | null {
 
     const canvas = canvasFrameRulersRef.current;
     const zoomFractionValue = Number(zoomFraction);
-    const step = Math.floor(zoomFractionValue * UNIT);
+    const step = Math.floor(zoomFractionValue * BACKGROUND_CANVAS_GRID_STEP_UNIT);
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
     drawFrameRulers({ 
       canvas, 
-      color: COLORS['primary-900'], 
-      constrastColor: COLORS['gray-100'],
-      unit: Math.floor(UNIT ** 2),
-      step: Math.floor(step * UNIT)
+      computedStyle,
+      unit: Math.floor(BACKGROUND_CANVAS_GRID_STEP_UNIT ** 2),
+      step: Math.floor(step * BACKGROUND_CANVAS_GRID_STEP_UNIT)
     });
   };
 
@@ -426,10 +429,11 @@ function BackgroundCanvas(): ReactElement | null {
     zoomFraction,
     canvasSize.width,
     canvasSize.height,
+    computedStyle,
   ]);
 
   const renderSizeFrames = () => {
-    if (canvasSizeFramesRef.current === null)
+    if (canvasSizeFramesRef.current === null || computedStyle === undefined)
       return;
 
     clearCanvas(canvasSizeFramesRef.current);
@@ -442,6 +446,7 @@ function BackgroundCanvas(): ReactElement | null {
     canvas.height = canvasSize.height;
     drawSizeFrames({
       canvas,
+      computedStyle,
       selectedItemPosition,
       zoomFractionValue,
       sizeValues,
@@ -449,13 +454,19 @@ function BackgroundCanvas(): ReactElement | null {
   };
 
   useEffect(() => {
-    if (selectedItemIndex === -1) return;
+    if (selectedItemIndex === -1 || computedStyle === undefined) return;
     monitorSizeValues();
     renderSizeFrames();
-  }, [selectedItemPosition?.x, selectedItemPosition?.y, isSizeFramesOn, selectedItemIndex]);
+  }, [
+    selectedItemPosition?.x, 
+    selectedItemPosition?.y, 
+    isSizeFramesOn, 
+    selectedItemIndex,
+    computedStyle
+  ]);
 
   useEffect(() => {
-    if (selectedItemIndex === -1) return;
+    if (selectedItemIndex === -1 || computedStyle === undefined) return;
     renderSizeFrames();
   }, [
     zoomFraction,
@@ -479,6 +490,7 @@ function BackgroundCanvas(): ReactElement | null {
     sizeValues?.marginTop,
     sizeValues?.marginBottom,
     selectedItemIndex,
+    computedStyle,
   ]);
 
   const resizeCanvas = () => {
@@ -486,7 +498,8 @@ function BackgroundCanvas(): ReactElement | null {
     dispatch({ 
       type: 'SET_CANVAS_SIZE', 
       payload: {
-        width: canvasWrapperRef.current.offsetWidth, height: canvasWrapperRef.current.offsetHeight
+        width: canvasWrapperRef.current.offsetWidth, 
+        height: canvasWrapperRef.current.offsetHeight
       }
     });
   };
@@ -529,11 +542,14 @@ function BackgroundCanvas(): ReactElement | null {
   }, [selectedItemIndex]);
 
   useEffect(() => {
-    window.onresize = () => {
+    addEventListener("resize", () => {
       resizeCanvas();
-    };
-    resizeCanvas();
+    });
   }, []);
+
+  useEffect(() => {
+    resizeCanvas();
+  }, [dividerWidth]);
 
   return (
     <div
@@ -541,21 +557,25 @@ function BackgroundCanvas(): ReactElement | null {
         width: '100%',
         height: '100%',
       }}
+      data-testid='background-canvas-wrapper'
       ref={canvasWrapperRef}
     >
       <canvas 
         width="100" height="100"
         style={{position: 'absolute', left: 0, top: 0, zIndex: 0}}
+        data-testid='background-grid-canvas'
         ref={canvasGridRef}
       ></canvas>
       <canvas 
         width="100" height="100"
         style={{position: 'absolute', left: 0, top: 0, zIndex: 1}}
+        data-testid='background-frame-rulers-canvas'
         ref={canvasFrameRulersRef}
       ></canvas>
       <canvas 
         width="100" height="100"
         style={{position: 'absolute', left: 0, top: 0, zIndex: 2}}
+        data-testid='background-size-frames-canvas'
         ref={canvasSizeFramesRef}
       ></canvas>
 

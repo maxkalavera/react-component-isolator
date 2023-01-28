@@ -2,70 +2,18 @@ import React, { useContext, useEffect, useReducer } from 'react';
 import _ from 'lodash';
 import sha256 from 'crypto-js/sha256';
 
+import useComputedStyle from 'src/hooks/useComputedStyle';
 import localStorageWrapper from 'src/utils/localStorageWrapper';
-import { ZOOM_FRACTIONS, LOCAL_STORAGE_CONTEXT_ID, DIVIDER_DEFAULT_WIDTH } from 'src/utils/constants';
+import {LOCAL_STORAGE_CONTEXT_ID} from 'src/utils/constants';
 
-import type IsolatedItem from 'src/interfaces/IsolatedItem.interfaces';
-
-export interface ReactIsolatorContext {
-  selectedItemID: string
-  selectedItemIndex: number
-  selectedItemPosition: { x: number, y: number }
-  isolatedItems: IsolatedItem[]
-  isolatedItemsStamp: string
-  canvasSize: { width: number, height: number }
-  searchTerm: string
-  isGridOn: boolean
-  isFrameRulersOn: boolean
-  isSizeFramesOn: boolean
-  dividerWidth: number
-  zoomFraction: (typeof ZOOM_FRACTIONS)[number]
-  dispatch: React.Dispatch<ReactIsolatorActions>,
-};
-
-type ReactIsolatorActions = {
-  type: 'SET_SELECTED_ITEM_ID',
-  payload:  ReactIsolatorContext['selectedItemID']
-} | {
-  type: 'SET_SELECTED_ITEM_POSITION',
-  payload:  ReactIsolatorContext['selectedItemPosition']
-} | {
-  type: 'SLIDE_SELECTED_ITEM_POSITION',
-  payload:  { deltaX: number, deltaY: number }
-} | {
-  type: 'ADD_ITEM',
-  payload:  IsolatedItem
-} | {
-  type: 'CLEAR_ITEMS'
-} | {
-  type: 'SET_CANVAS_SIZE',
-  payload: ReactIsolatorContext['canvasSize']
-} | {
-  type: 'SET_SEARCH_TERM',
-  payload:  ReactIsolatorContext['searchTerm']
-} | {
-  type: 'SET_IS_GRID_ON',
-  payload:  ReactIsolatorContext['isGridOn']
-} | {
-  type: 'SET_IS_FRAME_RULERS_ON',
-  payload:  ReactIsolatorContext['isFrameRulersOn']
-} | {
-  type: 'SET_IS_SIZE_FRAMES_ON',
-  payload:  ReactIsolatorContext['isSizeFramesOn']
-} | {
-  type: 'SET_DIVIDER_WIDTH',
-  payload:  ReactIsolatorContext['dividerWidth']
-} | {
-  type: 'SET_ZOOM_FRACTION',
-  payload:  ReactIsolatorContext['zoomFraction']
-};
+import type {ReactIsolatorContext, ReactIsolatorActions} from 'src/providers/ReactIsolatorContext.d';
 
 const LOCAL_STORAGE_STATE_ATTRIBUTES: Array<keyof ReactIsolatorContext> = [
   'selectedItemID', 'selectedItemPosition', 'searchTerm', 'isGridOn', 'isFrameRulersOn', 
   'isSizeFramesOn', 'dividerWidth', 'zoomFraction'
 ];
 
-const defaultState: ReactIsolatorContext = {
+const initialContextState: ReactIsolatorContext = {
   selectedItemID: '',
   selectedItemIndex: -1,
   selectedItemPosition: {x: 0, y: 0},
@@ -76,22 +24,25 @@ const defaultState: ReactIsolatorContext = {
   isGridOn: true,
   isFrameRulersOn: true,
   isSizeFramesOn: true,
-  dividerWidth: DIVIDER_DEFAULT_WIDTH,
+  dividerWidth: 191,
   zoomFraction: '1.00',
   dispatch: () => {},
 };
 
-let ReactIsolatorContext = React.createContext<ReactIsolatorContext>(defaultState);
+let ReactIsolatorContext = React.createContext<ReactIsolatorContext>(initialContextState);
 
 function useReactIsolatorContext(): ReactIsolatorContext {
   return useContext<ReactIsolatorContext>(ReactIsolatorContext);
 }
 
 function ReactIsolatorContextProvider({
-  children=[]
+  children=[],
+  initialState=initialContextState
 }: {
   children?: JSX.Element[] | JSX.Element
+  initialState?: ReactIsolatorContext
 }): JSX.Element {
+  const computedStyle = useComputedStyle();
   const [state, dispatch] = useReducer((state: ReactIsolatorContext, action: ReactIsolatorActions) => {
     const clone = _.cloneDeep(state);
 
@@ -101,7 +52,9 @@ function ReactIsolatorContextProvider({
           clone.selectedItemPosition.x = 0;
         } else if (clone.selectedItemPosition.x > clone.canvasSize.width) {
           clone.selectedItemPosition.x = clone.canvasSize.width;
-        } else if (clone.selectedItemPosition.y < 0) {
+        } 
+        
+        if (clone.selectedItemPosition.y < 0) {
           clone.selectedItemPosition.y = 0;
         } else if (clone.selectedItemPosition.y > clone.canvasSize.height) {
           clone.selectedItemPosition.y = clone.canvasSize.height;
@@ -154,8 +107,18 @@ function ReactIsolatorContextProvider({
       case 'SET_IS_SIZE_FRAMES_ON': 
         clone.isSizeFramesOn = action.payload;
         break;
-      case 'SET_DIVIDER_WIDTH': 
-        clone.dividerWidth = action.payload;
+      case 'SLIDE_DIVIDER': 
+        if (computedStyle) {
+          let dividerMinWidth = parseInt(computedStyle.getPropertyValue('--divider-min-width'));
+          let dividerMaxWidth = parseInt(computedStyle.getPropertyValue('--divider-max-width'));
+          clone.dividerWidth += action.payload;
+
+          if (clone.dividerWidth < dividerMinWidth) {
+            clone.dividerWidth = dividerMinWidth;
+          } else if (clone.dividerWidth > dividerMaxWidth) {
+            clone.dividerWidth = dividerMaxWidth
+          }
+        }
         break;
       case 'SET_ZOOM_FRACTION': 
         clone.zoomFraction = action.payload;
@@ -163,8 +126,8 @@ function ReactIsolatorContextProvider({
     }
     return clone;
   }, 
-    Object.assign(defaultState, localStorageWrapper.get(LOCAL_STORAGE_CONTEXT_ID, {}))
-  );
+    Object.assign(initialState, localStorageWrapper.get(LOCAL_STORAGE_CONTEXT_ID, {}))
+  )
 
   // Store designated attributes of state in local storage
   useEffect(() => {
@@ -185,6 +148,7 @@ function ReactIsolatorContextProvider({
 };
 
 export {
+  initialContextState,
   ReactIsolatorContextProvider,
   useReactIsolatorContext
 };

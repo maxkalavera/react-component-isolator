@@ -17,3 +17,35 @@
   align-self: stretch;
   flex-grow: 0;
 }
+
+.react-isolator--dark .header {
+  height: 60px;
+  background: var(--gray-900);
+  border-bottom: none;
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .header {
+    height: 60px;
+    background: var(--gray-900);
+    border-bottom: none;
+    box-shadow: none;
+  }
+}
+
+.header__logo--primary-fill {
+  fill: var(--primary-500);
+}
+
+.header__logo--primary-stroke {
+  stroke: var(--primary-500);
+}
+
+.header__logo--secondary-fill {
+  fill: var(--gray-800);
+}
+
+.header__logo--secondary-stroke {
+  stroke: var(--gray-800);
+}

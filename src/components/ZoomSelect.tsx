@@ -24,6 +24,7 @@ function ZoomSelect() {
       className={`select ${styles['zoom-select']}`}
       value={zoomFraction}
       onChange={onOptionSelected}
+      data-testid='zoom-select'
     >
       { ZOOM_FRACTIONS.map(item => (
         <option key={item} value={item}>

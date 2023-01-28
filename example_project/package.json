@@ -12,10 +12,12 @@
     "@types/react-dom": "^18.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-isolator": "file:externals/react-isolator",
     "react-scripts": "5.0.1",
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0"
+  },
+  "devDependencies": {
+    "react-isolator": "file:externals/react-isolator"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import logo from 'src/assets/logo.svg';
+import LogoHorizontal from './icons/LogoHorizontal';
 import styles from 'src/styles/header.module.css';
 
 function Header() {
@@ -8,7 +8,7 @@ function Header() {
     <div
       className={styles.header}
     >
-      <img src={logo} alt="Logo" />
+      <LogoHorizontal className={styles.header__logo}  />
     </div>
   );
 }

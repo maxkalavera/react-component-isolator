@@ -9,11 +9,12 @@ import Rulers from 'src/components/icons/Rulers';
 import SwitchButton from 'src/components/SwitchButton';
 import ZoomSelect from 'src/components/ZoomSelect';
 import ZoomBar from 'src/components/ZoomBar';
-import { BACKGROUND_CANVAS_FRAME_WIDTH } from 'src/utils/constants';
 import styles from 'src/styles/visualizer.module.css';
 
+const BACKGROUND_CANVAS_FRAME_WIDTH = 24;
+
 function Visualizer() {
-  const { isGridOn, isFrameRulersOn, isSizeFramesOn, zoomFraction, dispatch } = useReactIsolatorContext();
+  const { isGridOn, isFrameRulersOn, isSizeFramesOn, dispatch } = useReactIsolatorContext();
 
   return (
     <div className={styles.visualizer}>
@@ -21,6 +22,7 @@ function Visualizer() {
         <SwitchButton
           value={isSizeFramesOn}
           onChange={() => { dispatch({ type: 'SET_IS_SIZE_FRAMES_ON', payload: !isSizeFramesOn }) }}
+          data-testid='size-frames-switch-button'
         >
           <FileRulerFile 
             width={18}
@@ -31,6 +33,7 @@ function Visualizer() {
         <SwitchButton
           value={isFrameRulersOn}
           onChange={() => { dispatch({ type: 'SET_IS_FRAME_RULERS_ON', payload: !isFrameRulersOn }) }}
+          data-testid='frame-rulers-switch-button'
         >
           <Rulers 
             width={18}
@@ -41,6 +44,7 @@ function Visualizer() {
         <SwitchButton
           value={isGridOn}
           onChange={() => { dispatch({ type: 'SET_IS_GRID_ON', payload: !isGridOn }) }}
+          data-testid='grid-switch-button'
         >
           <Grid 
             width={18}
@@ -56,8 +60,6 @@ function Visualizer() {
         <BackgroundCanvas />
 
         <ZoomBar 
-          value={zoomFraction}
-          onChange={(value) => dispatch({ type: 'SET_ZOOM_FRACTION', payload: value }) }
           style={{
             position: 'absolute',
             left: BACKGROUND_CANVAS_FRAME_WIDTH + 12,

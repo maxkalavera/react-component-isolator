@@ -6,6 +6,7 @@
   align-items: flex-start;
   padding: var(--gap-md);
   gap: var(--gap-md);
+  overflow: clip;
 }
 
 .components-menu__wrapper {
@@ -13,7 +14,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  overflow-x: clip;
 }
 
 .components-menu__header {
@@ -27,6 +27,16 @@
   color: var(--gray-900);
 }
 
+.react-isolator--dark .components-menu__header  {
+  color: var(--gray-200);
+}
+
+@media (prefers-color-scheme: dark) {
+  .components-menu__header {
+    color: var(--gray-200);
+  }
+}
+
 .components-menu__content {
   width: 100%;
   display: flex;
@@ -34,6 +44,7 @@
   align-items: flex-start;
   padding-right: 3px;
   gap: calc(var(--gap-sm) * 0.5);
+  overflow-y: auto;
 }
 
 .components-menu__content::-webkit-scrollbar {
@@ -64,6 +75,16 @@
   color: var(--gray-900);
   user-select: none;
   cursor: pointer;
+}
+
+.react-isolator--dark .components-menu__item {
+  color: var(--gray-400);
+}
+
+@media (prefers-color-scheme: dark) {
+  .components-menu__item {
+    color: var(--gray-400);
+  }  
 }
 
 .components-menu__item--selected {
