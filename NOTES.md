@@ -8,4 +8,4 @@ git commit --amend --author="John Doe <john@doe.org>"
 - -- Add a separation between the list of react components and the visualizer component that is dragable
 - -- Add supporting to store the context in the web browser local storage
 
-//   padding: var(--gap-md);
+// padding: var(--gap-md);

@@ -1,4 +1,3 @@
-
 .react-isolator {
   width: 100vw;
   height: 100vh;
@@ -46,27 +45,27 @@
 }
 
 .react-isolator__divider:after {
-  content: '';
+  content: "";
   position: absolute;
   border-left: 2px solid var(--gray-400);
-  height: 100%; 
+  height: 100%;
   border-radius: 3px;
 }
 
-.react-isolator--dark  .react-isolator__divider:after {
+.react-isolator--dark .react-isolator__divider:after {
   border-left: 2px solid var(--gray-600);
 }
 
 @media (prefers-color-scheme: dark) {
   .react-isolator__divider:after {
     border-left: 2px solid var(--gray-600);
-  }  
+  }
 }
 
 .react-isolator__divider:hover:after {
-  content: '';
+  content: "";
   position: absolute;
   border-left: 4px solid var(--primary-400);
-  height: 100%; 
+  height: 100%;
   border-radius: 3px;
 }

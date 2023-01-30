@@ -1,29 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
-import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
+import { useReactIsolatorContext } from "src/providers/ReactIsolatorContext";
 
 function IsolatedItem({
-  name='',
-  element=<></>
+  name = "",
+  element = <></>,
 }: {
-  name: string
-  element: JSX.Element
+  name: string;
+  element: JSX.Element;
 }): JSX.Element {
   const { dispatch } = useReactIsolatorContext();
 
   useEffect(() => {
     dispatch({
-      type: 'ADD_ITEM',
+      type: "ADD_ITEM",
       payload: {
         name,
-        id: '',  // ID will be asigned later by the dispatcher of the ReactIsolatorContext
+        id: "", // ID will be asigned later by the dispatcher of the ReactIsolatorContext
         jsxElement: element,
-      }
+      },
     });
   }, []);
 
-  return (<></>);
-};
-
+  return <></>;
+}
 
 export default IsolatedItem;

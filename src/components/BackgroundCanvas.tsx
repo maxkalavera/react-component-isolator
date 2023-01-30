@@ -1,39 +1,42 @@
-import React, { 
-  ReactElement, 
-  useEffect, 
+import React, {
+  ReactElement,
+  useEffect,
   useRef,
-  useState, 
-  useCallback
+  useState,
+  useCallback,
 } from "react";
 
-import { getFloatValues } from 'src/utils/string';
-import { useReactIsolatorContext } from 'src/providers/ReactIsolatorContext';
-import { SELECTED_ELEMENT_WRAPPER_ID, SIZE_VALUES_DEFAULT} from 'src/utils/constants';
+import { getFloatValues } from "src/utils/string";
+import { useReactIsolatorContext } from "src/providers/ReactIsolatorContext";
+import {
+  SELECTED_ELEMENT_WRAPPER_ID,
+  SIZE_VALUES_DEFAULT,
+} from "src/utils/constants";
 import useComputedStyle from "src/hooks/useComputedStyle";
 import { BACKGROUND_CANVAS_GRID_STEP_UNIT } from "src/utils/constants";
 
-import type { SizeValues } from 'src/components/BackgroundCanvas.d';
+import type { SizeValues } from "src/components/BackgroundCanvas.d";
 
 function drawGrid({
   canvas,
   color,
   lineWidth,
   frameWidth,
-  step=BACKGROUND_CANVAS_GRID_STEP_UNIT,
+  step = BACKGROUND_CANVAS_GRID_STEP_UNIT,
 }: {
-  canvas: HTMLCanvasElement,
-  color: string,
-  lineWidth: number,
-  frameWidth: number,
-  unit?: number,
-  step?: number,
+  canvas: HTMLCanvasElement;
+  color: string;
+  lineWidth: number;
+  frameWidth: number;
+  unit?: number;
+  step?: number;
 }) {
   const context = canvas.getContext("2d");
   if (context === null) {
     return;
   }
 
-  const initialLinePosition = Math.floor(frameWidth / step) * - step;
+  const initialLinePosition = Math.floor(frameWidth / step) * -step;
   context.beginPath();
   context.lineWidth = lineWidth;
   context.strokeStyle = color;
@@ -56,26 +59,32 @@ function drawFrameRulers({
   unit,
   step,
 }: {
-  canvas: HTMLCanvasElement
-  computedStyle: CSSStyleDeclaration,
-  unit: number
-  step: number
+  canvas: HTMLCanvasElement;
+  computedStyle: CSSStyleDeclaration;
+  unit: number;
+  step: number;
 }) {
   const context = canvas.getContext("2d");
   if (context === null) {
     return;
   }
 
-  const frameWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width'));
-  const lineWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-line-width'));
+  const frameWidth = parseInt(
+    computedStyle.getPropertyValue("--background-canvas-frame-ruler-width")
+  );
+  const lineWidth = parseInt(
+    computedStyle.getPropertyValue("--background-canvas-frame-ruler-line-width")
+  );
   const halfframeWidthWidth = Math.floor(frameWidth * 0.5);
 
   context.beginPath();
   context.save();
   context.lineWidth = frameWidth;
-  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-frame-ruler');
+  context.strokeStyle = computedStyle.getPropertyValue(
+    "--background-canvas-frame-ruler"
+  );
   context.shadowBlur = 10;
-  context.shadowColor = computedStyle.getPropertyValue('--gray-900');
+  context.shadowColor = computedStyle.getPropertyValue("--gray-900");
 
   // Vertical frame
   context.moveTo(0, halfframeWidthWidth);
@@ -92,17 +101,19 @@ function drawFrameRulers({
   context.beginPath();
   context.save();
   context.lineWidth = lineWidth;
-  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-frame-contrast');
+  context.strokeStyle = computedStyle.getPropertyValue(
+    "--background-canvas-frame-contrast"
+  );
 
   // Vertical ones
   for (let i = step; i < canvas.height; i += step) {
-    context.moveTo(frameWidth * (3/ 4), frameWidth + i);
+    context.moveTo(frameWidth * (3 / 4), frameWidth + i);
     context.lineTo(frameWidth, frameWidth + i);
   }
 
   // Horizontal ones
   for (let i = step; i < canvas.width; i += step) {
-    context.moveTo(frameWidth + i, frameWidth * (3/ 4));
+    context.moveTo(frameWidth + i, frameWidth * (3 / 4));
     context.lineTo(frameWidth + i, frameWidth);
   }
 
@@ -113,7 +124,9 @@ function drawFrameRulers({
   context.beginPath();
   context.save();
   context.lineWidth = 1;
-  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-frame-contrast');
+  context.strokeStyle = computedStyle.getPropertyValue(
+    "--background-canvas-frame-contrast"
+  );
 
   context.moveTo(0, frameWidth);
   context.lineTo(frameWidth, frameWidth);
@@ -125,23 +138,29 @@ function drawFrameRulers({
 
   // Measure lines and text
   context.beginPath();
-  context.textAlign = 'center';
-  context.font = '10px Roboto';
-  context.textBaseline = 'middle';
-  context.fillStyle = computedStyle.getPropertyValue('--background-canvas-frame-contrast');
+  context.textAlign = "center";
+  context.font = "10px Roboto";
+  context.textBaseline = "middle";
+  context.fillStyle = computedStyle.getPropertyValue(
+    "--background-canvas-frame-contrast"
+  );
   // Vertical number text in measure lines
-  for (let i = 1; (i * step) < canvas.height; i += 1) {
+  for (let i = 1; i * step < canvas.height; i += 1) {
     context.save();
-    context.translate(halfframeWidthWidth, frameWidth + (i * step));
+    context.translate(halfframeWidthWidth, frameWidth + i * step);
     context.rotate(270 * (Math.PI / 180));
-    context.fillText(`${Math.floor(i * unit)}`, 0, 0);  
+    context.fillText(`${Math.floor(i * unit)}`, 0, 0);
     context.restore();
   }
 
   // Horizontal number text in measure lines
-  for (let i = 1; (i * step) < canvas.width; i += 1) {
+  for (let i = 1; i * step < canvas.width; i += 1) {
     context.save();
-    context.fillText(`${Math.floor(i * unit)}`, frameWidth + (i * step), halfframeWidthWidth);
+    context.fillText(
+      `${Math.floor(i * unit)}`,
+      frameWidth + i * step,
+      halfframeWidthWidth
+    );
     context.restore();
   }
 }
@@ -149,31 +168,37 @@ function drawFrameRulers({
 function drawSizeFrames({
   canvas,
   computedStyle,
-  selectedItemPosition=null,
-  zoomFractionValue=1.0,
-  sizeValues=SIZE_VALUES_DEFAULT,
+  selectedItemPosition = null,
+  zoomFractionValue = 1.0,
+  sizeValues = SIZE_VALUES_DEFAULT,
 }: {
-  canvas: HTMLCanvasElement,
-  computedStyle: CSSStyleDeclaration,
-  selectedItemPosition?: { x: number, y: number } | null,
-  zoomFractionValue?: number,
-  sizeValues?: SizeValues,
+  canvas: HTMLCanvasElement;
+  computedStyle: CSSStyleDeclaration;
+  selectedItemPosition?: { x: number; y: number } | null;
+  zoomFractionValue?: number;
+  sizeValues?: SizeValues;
 }) {
   const context = canvas.getContext("2d");
-  if ( 
-    context === null
-    || selectedItemPosition === null
-  ) {
+  if (context === null || selectedItemPosition === null) {
     return;
   }
-  const lineWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-size-frames-line-width'));
-  const frameWidth = parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width'));
-  const canvasPosition = [selectedItemPosition.x + frameWidth,  selectedItemPosition.y + frameWidth];
+  const lineWidth = parseInt(
+    computedStyle.getPropertyValue("--background-canvas-size-frames-line-width")
+  );
+  const frameWidth = parseInt(
+    computedStyle.getPropertyValue("--background-canvas-frame-ruler-width")
+  );
+  const canvasPosition = [
+    selectedItemPosition.x + frameWidth,
+    selectedItemPosition.y + frameWidth,
+  ];
 
   context.beginPath();
   context.save();
   context.lineWidth = Math.floor(lineWidth * zoomFractionValue);
-  context.strokeStyle = computedStyle.getPropertyValue('--background-canvas-size-frame-position-line');
+  context.strokeStyle = computedStyle.getPropertyValue(
+    "--background-canvas-size-frame-position-line"
+  );
 
   context.moveTo(canvasPosition[0], 0);
   context.lineTo(canvasPosition[0], canvas.height);
@@ -184,12 +209,12 @@ function drawSizeFrames({
   context.stroke();
   context.restore();
 
-  const drawFrame = (  // Width, border, padding and margin rules
-    rect: [number, number, number, number], 
+  const drawFrame = (
+    // Width, border, padding and margin rules
+    rect: [number, number, number, number],
     color: string
   ) => {
-    if (context === null)
-      return;
+    if (context === null) return;
 
     context.beginPath();
     context.save();
@@ -198,141 +223,153 @@ function drawSizeFrames({
     context.fill();
     context.restore();
   };
-  
-  const contentWidth = (
-    sizeValues.width 
-    - sizeValues.paddingLeft 
-    - sizeValues.paddingRight 
-    - sizeValues.borderLeft 
-    - sizeValues.borderRight
-  );
+
+  const contentWidth =
+    sizeValues.width -
+    sizeValues.paddingLeft -
+    sizeValues.paddingRight -
+    sizeValues.borderLeft -
+    sizeValues.borderRight;
   const horizontalFrames = [
     {
       value: sizeValues.marginLeft,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-margin"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.borderLeft,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-border"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.paddingLeft,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-padding"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: contentWidth,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-content'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-content"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.paddingRight,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-padding"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.borderRight,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-border"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.marginRight,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
-      rect: Array(4).fill(0)
-    }
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-margin"
+      ),
+      rect: Array(4).fill(0),
+    },
   ];
 
-  horizontalFrames.map((item) => item.value).reduce((prev, current, index) => {
-    // Order of code matters in this function
-    let currentWithZoom = Math.floor(current * zoomFractionValue);
-    horizontalFrames[index].rect = [prev, 0, currentWithZoom, canvas.height];
-    return Math.floor(prev + currentWithZoom);
-  }, 
-    canvasPosition[0]
-    - Math.floor(
-      (sizeValues.marginLeft + sizeValues.borderLeft + sizeValues.paddingLeft + (contentWidth * 0.5)) 
-      * zoomFractionValue
-    )
-  );  
+  horizontalFrames
+    .map((item) => item.value)
+    .reduce((prev, current, index) => {
+      // Order of code matters in this function
+      const currentWithZoom = Math.floor(current * zoomFractionValue);
+      horizontalFrames[index].rect = [prev, 0, currentWithZoom, canvas.height];
+      return Math.floor(prev + currentWithZoom);
+    }, canvasPosition[0] - Math.floor((sizeValues.marginLeft + sizeValues.borderLeft + sizeValues.paddingLeft + contentWidth * 0.5) * zoomFractionValue));
 
   horizontalFrames.forEach((item) => {
-    drawFrame(
-      item.rect as [number, number, number, number], 
-      item.color
-    );
+    drawFrame(item.rect as [number, number, number, number], item.color);
   });
 
-  let contentHeight = (
-    sizeValues.height 
-    - sizeValues.paddingTop 
-    - sizeValues.paddingBottom 
-    - sizeValues.borderTop 
-    - sizeValues.borderBottom
-  );
+  const contentHeight =
+    sizeValues.height -
+    sizeValues.paddingTop -
+    sizeValues.paddingBottom -
+    sizeValues.borderTop -
+    sizeValues.borderBottom;
   const verticalFrames = [
     {
       value: sizeValues.marginTop,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-margin"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.borderTop,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-border"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.paddingTop,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-padding"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: contentHeight,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-content'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-content"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.paddingBottom,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-padding'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-padding"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.borderBottom,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-border'),
-      rect: Array(4).fill(0)
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-border"
+      ),
+      rect: Array(4).fill(0),
     },
     {
       value: sizeValues.marginBottom,
-      color: computedStyle.getPropertyValue('--background-canvas-size-frame-margin'),
-      rect: Array(4).fill(0)
-    }
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-size-frame-margin"
+      ),
+      rect: Array(4).fill(0),
+    },
   ];
 
-  verticalFrames.map((item) => item.value).reduce((prev, current, index) => {
-    // Order of code matters in this function
-    let currentWithZoom = Math.floor(current * zoomFractionValue);
-    verticalFrames[index].rect = [0, prev, canvas.width, currentWithZoom];
-    return Math.floor(prev + currentWithZoom);
-  }, 
-    canvasPosition[1] 
-    - Math.floor(
-      (sizeValues.marginTop + sizeValues.borderTop + sizeValues.paddingTop + (contentHeight * 0.5))
-      * zoomFractionValue
-    )
-  );  
+  verticalFrames
+    .map((item) => item.value)
+    .reduce((prev, current, index) => {
+      // Order of code matters in this function
+      const currentWithZoom = Math.floor(current * zoomFractionValue);
+      verticalFrames[index].rect = [0, prev, canvas.width, currentWithZoom];
+      return Math.floor(prev + currentWithZoom);
+    }, canvasPosition[1] - Math.floor((sizeValues.marginTop + sizeValues.borderTop + sizeValues.paddingTop + contentHeight * 0.5) * zoomFractionValue));
 
   verticalFrames.forEach((item) => {
-    drawFrame(
-      item.rect as [number, number, number, number], 
-      item.color
-    );
+    drawFrame(item.rect as [number, number, number, number], item.color);
   });
 }
 
 /******************************************************************************
-* Component
-******************************************************************************/
+ * Component
+ ******************************************************************************/
 function BackgroundCanvas(): ReactElement | null {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasGridRef = useRef<HTMLCanvasElement>(null);
@@ -353,41 +390,53 @@ function BackgroundCanvas(): ReactElement | null {
   const computedStyle = useComputedStyle();
 
   const clearCanvas = (canvas: HTMLCanvasElement) => {
-    let context = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
     if (context === null) return;
     context.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   const renderGrid = () => {
-    if (canvasGridRef.current === null || computedStyle === undefined)
-      return;
+    if (canvasGridRef.current === null || computedStyle === undefined) return;
 
     clearCanvas(canvasGridRef.current);
-    if (isGridOn === false)
-      return;
+    if (isGridOn === false) return;
 
     const canvas = canvasGridRef.current;
     const zoomFractionValue = Number(zoomFraction);
-    const step = Math.floor(zoomFractionValue * BACKGROUND_CANVAS_GRID_STEP_UNIT);
+    const step = Math.floor(
+      zoomFractionValue * BACKGROUND_CANVAS_GRID_STEP_UNIT
+    );
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
     // Draw thin grid
-    drawGrid({ 
+    drawGrid({
       canvas,
-      color: computedStyle.getPropertyValue('--background-canvas-grid-thin-lines'),
-      lineWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-thin-lines-width')),
-      frameWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width')),
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-grid-thin-lines"
+      ),
+      lineWidth: parseInt(
+        computedStyle.getPropertyValue("--background-canvas-thin-lines-width")
+      ),
+      frameWidth: parseInt(
+        computedStyle.getPropertyValue("--background-canvas-frame-ruler-width")
+      ),
       unit: BACKGROUND_CANVAS_GRID_STEP_UNIT,
-      step
+      step,
     });
     // Draw thick grid
-    drawGrid({ 
-      canvas, 
-      color: computedStyle.getPropertyValue('--background-canvas-grid-thick-lines'),
-      lineWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-thick-lines-width')),
-      frameWidth: parseInt(computedStyle.getPropertyValue('--background-canvas-frame-ruler-width')),
+    drawGrid({
+      canvas,
+      color: computedStyle.getPropertyValue(
+        "--background-canvas-grid-thick-lines"
+      ),
+      lineWidth: parseInt(
+        computedStyle.getPropertyValue("--background-canvas-thick-lines-width")
+      ),
+      frameWidth: parseInt(
+        computedStyle.getPropertyValue("--background-canvas-frame-ruler-width")
+      ),
       unit: Math.floor(BACKGROUND_CANVAS_GRID_STEP_UNIT ** 2),
-      step: Math.floor(step * BACKGROUND_CANVAS_GRID_STEP_UNIT)
+      step: Math.floor(step * BACKGROUND_CANVAS_GRID_STEP_UNIT),
     });
   };
 
@@ -406,19 +455,20 @@ function BackgroundCanvas(): ReactElement | null {
       return;
 
     clearCanvas(canvasFrameRulersRef.current);
-    if(isFrameRulersOn === false)
-      return;
+    if (isFrameRulersOn === false) return;
 
     const canvas = canvasFrameRulersRef.current;
     const zoomFractionValue = Number(zoomFraction);
-    const step = Math.floor(zoomFractionValue * BACKGROUND_CANVAS_GRID_STEP_UNIT);
+    const step = Math.floor(
+      zoomFractionValue * BACKGROUND_CANVAS_GRID_STEP_UNIT
+    );
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
-    drawFrameRulers({ 
-      canvas, 
+    drawFrameRulers({
+      canvas,
       computedStyle,
       unit: Math.floor(BACKGROUND_CANVAS_GRID_STEP_UNIT ** 2),
-      step: Math.floor(step * BACKGROUND_CANVAS_GRID_STEP_UNIT)
+      step: Math.floor(step * BACKGROUND_CANVAS_GRID_STEP_UNIT),
     });
   };
 
@@ -437,8 +487,7 @@ function BackgroundCanvas(): ReactElement | null {
       return;
 
     clearCanvas(canvasSizeFramesRef.current);
-    if(isSizeFramesOn === false)
-      return;
+    if (isSizeFramesOn === false) return;
 
     const canvas = canvasSizeFramesRef.current;
     const zoomFractionValue = Number(zoomFraction);
@@ -458,11 +507,11 @@ function BackgroundCanvas(): ReactElement | null {
     monitorSizeValues();
     renderSizeFrames();
   }, [
-    selectedItemPosition?.x, 
-    selectedItemPosition?.y, 
-    isSizeFramesOn, 
+    selectedItemPosition?.x,
+    selectedItemPosition?.y,
+    isSizeFramesOn,
     selectedItemIndex,
-    computedStyle
+    computedStyle,
   ]);
 
   useEffect(() => {
@@ -473,7 +522,7 @@ function BackgroundCanvas(): ReactElement | null {
     isSizeFramesOn,
     canvasSize.width,
     canvasSize.height,
-    selectedItemPosition?.x, 
+    selectedItemPosition?.x,
     selectedItemPosition?.y,
     sizeValues?.width,
     sizeValues?.paddingLeft,
@@ -495,44 +544,70 @@ function BackgroundCanvas(): ReactElement | null {
 
   const resizeCanvas = () => {
     if (canvasWrapperRef.current === null) return;
-    dispatch({ 
-      type: 'SET_CANVAS_SIZE', 
+    dispatch({
+      type: "SET_CANVAS_SIZE",
       payload: {
-        width: canvasWrapperRef.current.offsetWidth, 
-        height: canvasWrapperRef.current.offsetHeight
-      }
+        width: canvasWrapperRef.current.offsetWidth,
+        height: canvasWrapperRef.current.offsetHeight,
+      },
     });
   };
 
   const monitorSizeValues = useCallback(() => {
     const wrapper = document.getElementById(SELECTED_ELEMENT_WRAPPER_ID);
-    if (wrapper === null || wrapper.firstChild === null)
-      return;
+    if (wrapper === null || wrapper.firstChild === null) return;
 
-    const computedStyle = window.getComputedStyle(wrapper.firstChild as Element, null);
+    const computedStyle = window.getComputedStyle(
+      wrapper.firstChild as Element,
+      null
+    );
 
     const comparisonSizeValues: SizeValues = {
-      width: getFloatValues(computedStyle.getPropertyValue('width'))[0],
-      paddingLeft: getFloatValues(computedStyle.getPropertyValue('padding-left'))[0],
-      paddingRight: getFloatValues(computedStyle.getPropertyValue('padding-right'))[0],
-      borderLeft: getFloatValues(computedStyle.getPropertyValue('border-left'))[0],
-      borderRight: getFloatValues(computedStyle.getPropertyValue('border-right'))[0],
-      marginLeft: getFloatValues(computedStyle.getPropertyValue('margin-left'))[0],
-      marginRight: getFloatValues(computedStyle.getPropertyValue('margin-right'))[0],
-      height: getFloatValues(computedStyle.getPropertyValue('height'))[0],
-      paddingTop: getFloatValues(computedStyle.getPropertyValue('padding-top'))[0],
-      paddingBottom: getFloatValues(computedStyle.getPropertyValue('padding-bottom'))[0],
-      borderTop: getFloatValues(computedStyle.getPropertyValue('border-top'))[0],
-      borderBottom: getFloatValues(computedStyle.getPropertyValue('border-bottom'))[0],
-      marginTop: getFloatValues(computedStyle.getPropertyValue('margin-top'))[0],
-      marginBottom: getFloatValues(computedStyle.getPropertyValue('margin-bottom'))[0],
+      width: getFloatValues(computedStyle.getPropertyValue("width"))[0],
+      paddingLeft: getFloatValues(
+        computedStyle.getPropertyValue("padding-left")
+      )[0],
+      paddingRight: getFloatValues(
+        computedStyle.getPropertyValue("padding-right")
+      )[0],
+      borderLeft: getFloatValues(
+        computedStyle.getPropertyValue("border-left")
+      )[0],
+      borderRight: getFloatValues(
+        computedStyle.getPropertyValue("border-right")
+      )[0],
+      marginLeft: getFloatValues(
+        computedStyle.getPropertyValue("margin-left")
+      )[0],
+      marginRight: getFloatValues(
+        computedStyle.getPropertyValue("margin-right")
+      )[0],
+      height: getFloatValues(computedStyle.getPropertyValue("height"))[0],
+      paddingTop: getFloatValues(
+        computedStyle.getPropertyValue("padding-top")
+      )[0],
+      paddingBottom: getFloatValues(
+        computedStyle.getPropertyValue("padding-bottom")
+      )[0],
+      borderTop: getFloatValues(
+        computedStyle.getPropertyValue("border-top")
+      )[0],
+      borderBottom: getFloatValues(
+        computedStyle.getPropertyValue("border-bottom")
+      )[0],
+      marginTop: getFloatValues(
+        computedStyle.getPropertyValue("margin-top")
+      )[0],
+      marginBottom: getFloatValues(
+        computedStyle.getPropertyValue("margin-bottom")
+      )[0],
     };
 
-    setSizeValues((prevState) => (
-      (JSON.stringify(prevState) === JSON.stringify(comparisonSizeValues)) 
-      ? prevState
-      : comparisonSizeValues
-    ));
+    setSizeValues((prevState) =>
+      JSON.stringify(prevState) === JSON.stringify(comparisonSizeValues)
+        ? prevState
+        : comparisonSizeValues
+    );
   }, []);
 
   useEffect(() => {
@@ -554,33 +629,35 @@ function BackgroundCanvas(): ReactElement | null {
   return (
     <div
       style={{
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
       }}
-      data-testid='background-canvas-wrapper'
+      data-testid="background-canvas-wrapper"
       ref={canvasWrapperRef}
     >
-      <canvas 
-        width="100" height="100"
-        style={{position: 'absolute', left: 0, top: 0, zIndex: 0}}
-        data-testid='background-grid-canvas'
+      <canvas
+        width="100"
+        height="100"
+        style={{ position: "absolute", left: 0, top: 0, zIndex: 0 }}
+        data-testid="background-grid-canvas"
         ref={canvasGridRef}
       ></canvas>
-      <canvas 
-        width="100" height="100"
-        style={{position: 'absolute', left: 0, top: 0, zIndex: 1}}
-        data-testid='background-frame-rulers-canvas'
+      <canvas
+        width="100"
+        height="100"
+        style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}
+        data-testid="background-frame-rulers-canvas"
         ref={canvasFrameRulersRef}
       ></canvas>
-      <canvas 
-        width="100" height="100"
-        style={{position: 'absolute', left: 0, top: 0, zIndex: 2}}
-        data-testid='background-size-frames-canvas'
+      <canvas
+        width="100"
+        height="100"
+        style={{ position: "absolute", left: 0, top: 0, zIndex: 2 }}
+        data-testid="background-size-frames-canvas"
         ref={canvasSizeFramesRef}
       ></canvas>
-
     </div>
-  );  
+  );
 }
 
 export default BackgroundCanvas;

@@ -1,4 +1,3 @@
-
 .searchbar {
   box-sizing: border-box;
   display: flex;
@@ -12,10 +11,10 @@
   border: 1px solid var(--gray-600);
   border-radius: 6px;
 
-  font-family: 'Roboto', serif;
+  font-family: "Roboto", serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 1.0rem;
+  font-size: 1rem;
   color: var(--gray-800);
 }
 
@@ -46,4 +45,3 @@
     color: var(--gray-900);
   }
 }
-

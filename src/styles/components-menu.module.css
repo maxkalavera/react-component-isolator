@@ -27,7 +27,7 @@
   color: var(--gray-900);
 }
 
-.react-isolator--dark .components-menu__header  {
+.react-isolator--dark .components-menu__header {
   color: var(--gray-200);
 }
 
@@ -84,7 +84,7 @@
 @media (prefers-color-scheme: dark) {
   .components-menu__item {
     color: var(--gray-400);
-  }  
+  }
 }
 
 .components-menu__item--selected {

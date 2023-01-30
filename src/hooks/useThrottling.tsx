@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { useRef } from "react";
 
 export function useThrottling(
-  func: Function,
-  delay: number | undefined=1000/24,
-  trailing: boolean=false,
+  func: (...args: any[]) => any,
+  delay: number | undefined = 1000 / 24,
+  trailing = false
 ) {
   const timeoutRef = useRef<NodeJS.Timer | null>(null);
 
@@ -14,16 +15,14 @@ export function useThrottling(
           func(...args);
           timeoutRef.current = null;
         }, delay);
-      }  
-
+      }
     } else {
       if (timeoutRef.current === null) {
         func(...args);
         timeoutRef.current = setTimeout(() => {
           timeoutRef.current = null;
         }, delay);
-      }  
+      }
     }
-
   };
-};
+}

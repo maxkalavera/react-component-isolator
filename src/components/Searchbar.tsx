@@ -1,25 +1,24 @@
-import React from 'react';
+import React from "react";
 
-import styles from 'src/styles/searchbar.module.css';
+import styles from "src/styles/searchbar.module.css";
 
-function Searchbar ({
- className='',
- value='',
- onChange=()=>{}
+function Searchbar({
+  className = "",
+  value = "",
+  onChange = () => undefined,
 }: {
-  className?: string
-  value?: string
-  onChange?: (value: string) => void
+  className?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
-    <input 
-      type="text" 
+    <input
+      type="text"
       placeholder="Search..."
       className={`${styles.searchbar} ${className}`}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-    >
-    </input>
+    ></input>
   );
 }
 
