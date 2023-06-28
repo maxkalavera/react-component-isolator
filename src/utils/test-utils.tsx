@@ -49,6 +49,7 @@ export const testingInitialContextState: typeof initialContextState = {
   isGridOn: false,
   isFrameRulersOn: false,
   isSizeFramesOn: false,
+  darkMode: false,
 };
 
 export function cleanup() {

@@ -35,7 +35,7 @@ const initialContextState: ReactIsolatorContext = {
   isSizeFramesOn: true,
   dividerWidth: 191,
   zoomFraction: "1.00",
-  darkMode: false,
+  darkMode: null,
   dispatch: () => undefined,
 };
 
@@ -184,12 +184,14 @@ function ReactIsolatorContextProvider({
   );
 
   useEffect(() => {
-    dispatch({
-      type: "SET_DARK_MODE",
-      payload:
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches,
-    });
+    if (state.darkMode === null) {
+      dispatch({
+        type: "SET_DARK_MODE",
+        payload:
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches,
+      });
+    }
   }, []);
 
   return (

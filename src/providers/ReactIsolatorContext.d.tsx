@@ -16,7 +16,7 @@ export interface ReactIsolatorContext {
   isSizeFramesOn: boolean;
   dividerWidth: number;
   zoomFraction: (typeof ZOOM_FRACTIONS)[number];
-  darkMode: boolean;
+  darkMode: boolean | null;
   dispatch: React.Dispatch<ReactIsolatorActions>;
 }
 

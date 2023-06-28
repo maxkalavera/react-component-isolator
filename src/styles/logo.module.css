@@ -1,4 +1,5 @@
 .logo {
+  background-color: transparent;
   display: inline-flex;
   justify-content: flex-end;
   align-items: first baseline;
@@ -31,32 +32,35 @@
   border: 2px solid var(--gray-500, #424242);
 }
 
-/*
-.logo {
-  background-color: transparent;
-}
-
-.logo .logo--primary-fill {
+.logo--primary-fill {
   fill: var(--primary-500);
 }
 
-.logo .logo--primary-stroke {
+.logo--primary-stroke {
   stroke: var(--primary-500);
 }
 
-.logo .logo--secondary-fill {
+.logo--secondary-fill {
   fill: var(--gray-800);
 }
 
-.logo .logo--secondary-stroke {
+.logo--secondary-stroke {
   stroke: var(--gray-800);
 }
 
-div[class*="theme--dark"] .logo .logo--secondary-fill {
+div[class*="theme--dark"] .logo--primary-fill {
+  fill: var(--primary-500);
+}
+
+div[class*="theme--dark"] .logo--primary-stroke {
+  stroke: var(--primary-500);
+}
+
+div[class*="theme--dark"] .logo--secondary-fill {
   fill: var(--gray-300);
 }
 
-div[class*="theme--dark"] .logo .logo--secondary-stroke {
+div[class*="theme--dark"] .logo--secondary-stroke {
   stroke: var(--gray-300);
 }
-*/
+

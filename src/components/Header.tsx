@@ -14,12 +14,9 @@ function Header() {
     <div className={styles.header}>
       <LogoHorizontal className={styles["header__logo"]} />
       <SwitchButton
-        value={darkMode}
-        onChange={() => {
-          console.log("TOGGLE DARK MODE");
-          dispatch({ type: "TOGLE_DARK_MODE" });
-        }}
-        data-testid="grid-switch-button"
+        value={darkMode === null ? false : true}
+        onChange={() => dispatch({ type: "TOGLE_DARK_MODE" })}
+        data-testid="dark-mode--switch-button"
       >
         <CircleHalf width={18} height={18} />
       </SwitchButton>

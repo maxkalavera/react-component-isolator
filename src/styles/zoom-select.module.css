@@ -20,6 +20,10 @@
   user-select: none;
 }
 
+.zoom-select:hover {
+  box-shadow: inset 0px 0px 2px 2px var(--gray-300);
+}
+
 .zoom-select:focus {
   border: 1px solid var(--gray-700);
   outline: none;
