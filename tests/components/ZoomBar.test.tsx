@@ -38,7 +38,8 @@ describe("Component ZoomBar", () => {
     await waitFor(() =>
       expect(
         parseFloat(
-          callback.mock.results[callback.mock.results.length - 1].value as string
+          callback.mock.results[callback.mock.results.length - 1]
+            .value as string
         )
       ).toBeGreaterThan(1.0)
     );
@@ -49,7 +50,8 @@ describe("Component ZoomBar", () => {
     await waitFor(() =>
       expect(
         parseFloat(
-          callback.mock.results[callback.mock.results.length - 1].value as string
+          callback.mock.results[callback.mock.results.length - 1]
+            .value as string
         )
       ).toBeLessThan(1.0)
     );

@@ -18,7 +18,7 @@ function ReactIsolator({
   children?: JSX.Element[] | JSX.Element;
 }): JSX.Element {
   const computedStyle = useComputedStyle();
-  const { dividerWidth, dispatch } = useReactIsolatorContext();
+  const { dividerWidth, darkMode, dispatch } = useReactIsolatorContext();
   const dividerRef = useRef<HTMLDivElement>(null);
   const [{ mousePositionDelta }, setMousePosition] = useState<{
     mousePositionX: number;
@@ -72,7 +72,7 @@ function ReactIsolator({
   return (
     <div
       id={ROOT_ELEMENT_ID}
-      className={`${globalStyles["vars"]} ${styles["react-isolator"]}`}
+      className={`${globalStyles["vars"]}  ${darkMode ? globalStyles["theme--dark"] : ""} ${styles["react-isolator"]}`}
     >
       {children}
 

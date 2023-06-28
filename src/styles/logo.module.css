@@ -1,4 +1,38 @@
 .logo {
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items:first baseline;
+  gap: 8px;
+}
+
+.left-side {
+  width: min-content;
+  color: var(--primary-500);
+  font-size: 24px;
+  font-family: Roboto;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.right-side {
+  box-sizing: border-box;
+  color: var(--gray-800, #424242);
+  font-size: 16px;
+  font-family: Roboto;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+
+  display: flex;
+  padding: 1px 3px;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 6px 6px 6px 0px;
+  border: 2px solid var(--gray-500, #424242);
+}
+
+/*
+.logo {
   background-color: transparent;
 }
 
@@ -18,22 +52,11 @@
   stroke: var(--gray-800);
 }
 
-.react-isolator--dark .logo .logo--secondary-fill {
+div[class*="theme--dark"] .logo .logo--secondary-fill {
   fill: var(--gray-300);
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo .logo--secondary-fill {
-    fill: var(--gray-300);
-  }
-}
-
-.react-isolator--dark .logo .logo--secondary-stroke {
+div[class*="theme--dark"] .logo .logo--secondary-stroke {
   stroke: var(--gray-300);
 }
-
-@media (prefers-color-scheme: dark) {
-  .logo .logo--secondary-stroke {
-    stroke: var(--gray-300);
-  }
-}
+*/

@@ -385,6 +385,7 @@ function BackgroundCanvas(): ReactElement | null {
     isSizeFramesOn,
     canvasSize,
     dividerWidth,
+    darkMode,
     dispatch,
   } = useReactIsolatorContext();
   const computedStyle = useComputedStyle();
@@ -443,6 +444,7 @@ function BackgroundCanvas(): ReactElement | null {
   useEffect(() => {
     renderGrid();
   }, [
+    darkMode,
     isGridOn,
     zoomFraction,
     canvasSize.width,

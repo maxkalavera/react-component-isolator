@@ -1,12 +1,12 @@
 .header {
   width: 100%;
-  height: 48px;
+  height: 72px;
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: var(--gap-md);
+  padding: var(--gap-sm);
   gap: var(--gap-md);
   background: var(--white);
   border-bottom: 1px solid var(--gray-400);
@@ -17,20 +17,15 @@
   flex-grow: 0;
 }
 
-.react-isolator--dark .header {
-  height: 60px;
+.header__logo {
+  height: 24px;
+  overflow: visible;
+}
+
+div[class*="theme--dark"] .header {
   background: var(--gray-900);
   border-bottom: none;
   box-shadow: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .header {
-    height: 60px;
-    background: var(--gray-900);
-    border-bottom: none;
-    box-shadow: none;
-  }
 }
 
 .header__logo--primary-fill {

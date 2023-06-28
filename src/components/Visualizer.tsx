@@ -64,8 +64,8 @@ function Visualizer() {
         <ZoomBar
           style={{
             position: "absolute",
-            left: (BACKGROUND_CANVAS_FRAME_WIDTH + 12).toString(),
-            top: (BACKGROUND_CANVAS_FRAME_WIDTH + 12).toString(),
+            left: `${BACKGROUND_CANVAS_FRAME_WIDTH + 24}px`,
+            top: `${BACKGROUND_CANVAS_FRAME_WIDTH + 24}px`,
           }}
         />
         <div

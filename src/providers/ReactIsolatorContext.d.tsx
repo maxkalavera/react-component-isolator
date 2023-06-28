@@ -16,6 +16,7 @@ export interface ReactIsolatorContext {
   isSizeFramesOn: boolean;
   dividerWidth: number;
   zoomFraction: (typeof ZOOM_FRACTIONS)[number];
+  darkMode: boolean,
   dispatch: React.Dispatch<ReactIsolatorActions>;
 }
 
@@ -66,4 +67,11 @@ export type ReactIsolatorActions =
   | {
       type: "SET_ZOOM_FRACTION";
       payload: ReactIsolatorContext["zoomFraction"];
-    };
+    }
+  | {
+      type: "SET_DARK_MODE";
+      payload: ReactIsolatorContext["darkMode"];
+    }
+  | {
+    type: "TOGLE_DARK_MODE";
+  };

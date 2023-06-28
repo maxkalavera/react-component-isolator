@@ -4,8 +4,7 @@ import sha256 from "crypto-js/sha256";
 
 import useComputedStyle from "src/hooks/useComputedStyle";
 import localStorageWrapper from "src/utils/localStorageWrapper";
-import { LOCAL_STORAGE_CONTEXT_ID } from "src/utils/constants";
-
+import { LOCAL_STORAGE_CONTEXT_ID, ROOT_ELEMENT_ID } from "src/utils/constants";
 import type {
   ReactIsolatorContext,
   ReactIsolatorActions,
@@ -20,6 +19,7 @@ const LOCAL_STORAGE_STATE_ATTRIBUTES: Array<keyof ReactIsolatorContext> = [
   "isSizeFramesOn",
   "dividerWidth",
   "zoomFraction",
+  "darkMode",
 ];
 
 const initialContextState: ReactIsolatorContext = {
@@ -35,6 +35,7 @@ const initialContextState: ReactIsolatorContext = {
   isSizeFramesOn: true,
   dividerWidth: 191,
   zoomFraction: "1.00",
+  darkMode: false,
   dispatch: () => undefined,
 };
 
@@ -94,7 +95,9 @@ function ReactIsolatorContextProvider({
           break;
         case "ADD_ITEM":
           action.payload.id = sha256(
-            `${(action.payload.jsxElement.type as string).toString()}${state.isolatedItems.length}`
+            `${(action.payload.jsxElement.type as string).toString()}${
+              state.isolatedItems.length
+            }`
           ).toString();
           clone.isolatedItems = state.isolatedItems.concat(action.payload);
           clone.isolatedItemsStamp = sha256(
@@ -149,12 +152,21 @@ function ReactIsolatorContextProvider({
         case "SET_ZOOM_FRACTION":
           clone.zoomFraction = action.payload;
           break;
+        case "SET_DARK_MODE":
+          clone.darkMode = action.payload;
+          break;
+        case "TOGLE_DARK_MODE":
+          clone.darkMode = !clone.darkMode;
+          break;
       }
       return clone;
     },
     Object.assign(
       initialState,
-      localStorageWrapper.get(LOCAL_STORAGE_CONTEXT_ID, {}) as ReactIsolatorContext
+      localStorageWrapper.get(
+        LOCAL_STORAGE_CONTEXT_ID,
+        {}
+      ) as ReactIsolatorContext
     )
   );
 
@@ -170,6 +182,13 @@ function ReactIsolatorContextProvider({
     },
     LOCAL_STORAGE_STATE_ATTRIBUTES.map((item) => state[item])
   );
+
+  useEffect(() => {
+    dispatch({
+      type: 'SET_DARK_MODE',
+      payload: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    });
+  }, []);
 
   return (
     <ReactIsolatorContext.Provider

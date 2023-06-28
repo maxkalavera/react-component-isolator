@@ -18,10 +18,15 @@ describe("Components Visualizer", () => {
   const testContext = {
     callback: jest.fn(),
   } as {
-    callback: jest.MockedFunction<(context: ReactIsolatorContext) => void | boolean | {
-      x: number;
-      y: number;
-  }>
+    callback: jest.MockedFunction<
+      (context: ReactIsolatorContext) =>
+        | void
+        | boolean
+        | {
+            x: number;
+            y: number;
+          }
+    >;
   };
   beforeEach(() => {
     render(

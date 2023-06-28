@@ -27,14 +27,8 @@
   color: var(--gray-900);
 }
 
-.react-isolator--dark .components-menu__header {
+div[class*="theme--dark"] .components-menu__header {
   color: var(--gray-200);
-}
-
-@media (prefers-color-scheme: dark) {
-  .components-menu__header {
-    color: var(--gray-200);
-  }
 }
 
 .components-menu__content {
@@ -62,6 +56,11 @@
   height: 30px;
 }
 
+.components-menu__content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-500);
+  cursor: grab;
+}
+
 .components-menu__item {
   box-sizing: border-box;
   width: 100%;
@@ -77,20 +76,14 @@
   cursor: pointer;
 }
 
-.react-isolator--dark .components-menu__item {
-  color: var(--gray-400);
-}
-
-@media (prefers-color-scheme: dark) {
-  .components-menu__item {
-    color: var(--gray-400);
-  }
+div[class*="theme--dark"] .components-menu__item {
+  color: var(--gray-300);
 }
 
 .components-menu__item--selected {
   text-decoration: underline;
-  border-bottom: 1px solid var(--gray-400);
-  border-left: 1px solid var(--gray-400);
+  border-bottom: 1px solid var(--gray-300);
+  border-left: 1px solid var(--gray-300);
   border-radius: 0px 0px 0px 6px;
 }
 

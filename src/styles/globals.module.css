@@ -54,7 +54,6 @@
     var(--content-container-min-height) -
       calc(2 * var(--content-container-padding))
   );
-
   --divider-default-width: 191px;
   --divider-min-width: 0px;
   --divider-max-width: 1024px;
@@ -63,6 +62,7 @@
   --background-canvas-frame-ruler-line-width: 2px;
   --background-canvas-thin-lines-width: 1px;
   --background-canvas-thick-lines-width: 2px;
+
   --background-canvas-frame-ruler: var(--primary-900);
   --background-canvas-frame-contrast: var(--gray-100);
   --background-canvas-grid-thin-lines: var(--gray-100);
@@ -72,6 +72,14 @@
   --background-canvas-size-frame-border: #e1341e50;
   --background-canvas-size-frame-padding: #1e6ae150;
   --background-canvas-size-frame-content: #1fa9cf50;
+  --background-canvas-color: var(--white);
+}
+
+.theme--dark {
+  --background-canvas-frame-contrast: var(--gray-400);
+  --background-canvas-grid-thin-lines: var(--gray-800);
+  --background-canvas-grid-thick-lines: var(--gray-600);
+  --background-canvas-color: #092F3A;
 }
 
 .no-margin body,

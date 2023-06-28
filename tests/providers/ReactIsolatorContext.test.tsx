@@ -18,10 +18,12 @@ describe("Provider ReactIsolatorContext", () => {
   const testContext: {
     initialContextState: typeof testingInitialContextState;
     dispatch?: Dispatch<ReactIsolatorActions>;
-    callback?: jest.MockedFunction<(context: ReactIsolatorContext) => void | {
-      x: number;
-      y: number;
-    }>;
+    callback?: jest.MockedFunction<
+      (context: ReactIsolatorContext) => void | {
+        x: number;
+        y: number;
+      }
+    >;
   } = {
     initialContextState: {
       ...testingInitialContextState,
@@ -83,7 +85,9 @@ describe("Provider ReactIsolatorContext", () => {
     await waitFor(() =>
       expect(selectedItemIDCallback).toHaveBeenLastCalledWith("1")
     );
-    const lastPosition = (selectedItemPositionCallback.mock.lastCall as {x: number; y: number;}[])[0];
+    const lastPosition = (
+      selectedItemPositionCallback.mock.lastCall as { x: number; y: number }[]
+    )[0];
     expect(Math.abs(centeredPosition.x - lastPosition.x)).toBeLessThanOrEqual(
       1.0
     );

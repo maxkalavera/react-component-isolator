@@ -26,18 +26,12 @@
   position: relative;
   overflow: clip;
   box-sizing: border-box;
-  background: var(--white);
+  background: var(--background-canvas-color);
   box-shadow: 0px 0px 3px 1px var(--gray-700) inset;
 }
 
-.react-isolator--dark .visualizer__content {
-  background: var(--gray-700);
-}
-
-@media (prefers-color-scheme: dark) {
-  .visualizer__content {
-    background: var(--gray-700);
-  }
+div[class*="theme--dark"] .visualizer__content {
+  background: var(--background-canvas-color);
 }
 
 .visualizer__content::-webkit-scrollbar {

@@ -12,7 +12,8 @@
     "test:react/17.0.2": "REACT_VERSION_ALIAS='react-1702, react-dom-1702, testing-library-react-1200' jest",
     "test:react/16.8.0": "REACT_VERSION_ALIAS='react-1680, react-dom-1680, testing-library-react-1127' jest",
     "test:react/16.7.0": "REACT_VERSION_ALIAS='react-1670, react-dom-1670, testing-library-react-1127' jest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "pre-commit-check": "npm run prettier && npm run lint:ts || true && npm run test || true"
   },
   "peerDependencies": {
     "react": "^16.8.0",

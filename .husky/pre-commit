@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# "|| true" is used to ignore error return from the commands
-npm run prettier
-npm run lint:ts || true
-npm run test || true
+# npm run prettier
+# npm run lint:ts || true
+# npm run test || true
+npm run pre-commit-check
