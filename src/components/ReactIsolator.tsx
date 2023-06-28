@@ -72,7 +72,9 @@ function ReactIsolator({
   return (
     <div
       id={ROOT_ELEMENT_ID}
-      className={`${globalStyles["vars"]}  ${darkMode ? globalStyles["theme--dark"] : ""} ${styles["react-isolator"]}`}
+      className={`${globalStyles["vars"]}  ${
+        darkMode ? globalStyles["theme--dark"] : ""
+      } ${styles["react-isolator"]}`}
     >
       {children}
 

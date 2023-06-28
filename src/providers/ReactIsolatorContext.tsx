@@ -185,8 +185,10 @@ function ReactIsolatorContextProvider({
 
   useEffect(() => {
     dispatch({
-      type: 'SET_DARK_MODE',
-      payload: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      type: "SET_DARK_MODE",
+      payload:
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches,
     });
   }, []);
 

@@ -79,7 +79,7 @@
   --background-canvas-frame-contrast: var(--gray-400);
   --background-canvas-grid-thin-lines: var(--gray-800);
   --background-canvas-grid-thick-lines: var(--gray-600);
-  --background-canvas-color: #092F3A;
+  --background-canvas-color: #092f3a;
 }
 
 .no-margin body,
