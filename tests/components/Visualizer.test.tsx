@@ -28,7 +28,7 @@ describe("Components Visualizer", () => {
           }
     >;
   };
-  
+
   beforeEach(() => {
     render(
       <ReactIsolatorContextProvider

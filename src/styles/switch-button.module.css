@@ -41,7 +41,6 @@ div[class*="theme--dark"] .switch-button--on {
   box-shadow: none;
 }
 
-
 div[class*="theme--dark"] .switch-button--on:hover {
   border: 1px solid var(--gray-600);
   box-shadow: none;
