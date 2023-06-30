@@ -4,7 +4,7 @@ import sha256 from "crypto-js/sha256";
 
 import useComputedStyle from "src/hooks/useComputedStyle";
 import localStorageWrapper from "src/utils/localStorageWrapper";
-import { LOCAL_STORAGE_CONTEXT_ID, ROOT_ELEMENT_ID } from "src/utils/constants";
+import { LOCAL_STORAGE_CONTEXT_ID } from "src/utils/constants";
 import type {
   ReactIsolatorContext,
   ReactIsolatorActions,

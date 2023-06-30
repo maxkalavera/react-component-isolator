@@ -9,11 +9,13 @@ As the name indicates, this is a tool that allows you to visualized React compon
 ## Quick start
 
 using npm:
+
 ```bash
 npm install -D react-component-isolator
 ```
 
 using yarn:
+
 ```bash
 yarn add --dev react-component-isolator
 ```
@@ -29,26 +31,23 @@ import { ReactIsolator, IsolatedItem } from "react-isolator";
 ```js
 import { ReactIsolator, IsolatedItem } from "react-isolator";
 
-function Button({label=''}) {
+function Button({ label = "" }) {
   return (
-    <button
-      type="button"
-      onClick={() => console.log("Button clicked!")}
-    >
+    <button type="button" onClick={() => console.log("Button clicked!")}>
       <p>{label}</p>
     </button>
   );
 }
 
 export function IsolatedButton() {
-  return <Button label='I am a Button!' />
+  return <Button label="I am a Button!" />;
 }
 
 export default Button;
 
 <ReactIsolator>
   <IsolatedItem name="Button" element={<Button />} />
-</ReactIsolator>
+</ReactIsolator>;
 ```
 
 Alternatively, the isolated code can be located in its own file:
@@ -72,17 +71,20 @@ export default IsolatedButton;
 <br />
 
 ### ReactIsolator
+
 Main component of the tool, can be conceptualized as a list to visualize every child component.
 
 <br />
 
 ### IsolatedItem
+
 Component that holds the isolated element to visualize.
+
 #### Props
+
 - `name`: Label to identify the component in visualizer.
 - `jsxElement`: The component to render.
 
-
 ## License
-React component library is supported under [MIT licensed](https://github.com/maxkalavera/react-component-isolator/blob/main/LICENSE.md).
 
+React component library is supported under [MIT licensed](https://github.com/maxkalavera/react-component-isolator/blob/main/LICENSE.md).
