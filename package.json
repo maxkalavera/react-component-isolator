@@ -1,6 +1,6 @@
 {
   "name": "react-isolator",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "license": "MIT",
   "scripts": {
     "build": "rollup -c rollup.config.js",

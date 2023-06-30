@@ -11,13 +11,13 @@ As the name indicates, this is a tool that allows you to visualized React compon
 using npm:
 
 ```bash
-npm install -D react-component-isolator
+npm install -D react-isolator
 ```
 
 using yarn:
 
 ```bash
-yarn add --dev react-component-isolator
+yarn add --dev react-isolator
 ```
 
 Once the package is installed, you can import the library using `import` or `require` approach:
