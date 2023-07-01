@@ -1,4 +1,5 @@
-import resolve from "@rollup/plugin-node-resolve";
+
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import progress from "rollup-plugin-progress";
 import commonjs from "rollup-plugin-commonjs";
 import filesize from "rollup-plugin-filesize";
@@ -18,15 +19,11 @@ export default (() => {
     case "production":
       outputDir = "./dist";
       return {
-        preserveModules: true,
         input: "src/main.tsx",
         output: {
           dir: outputDir,
           format: "cjs",
-          name: "react-component-isolator",
-          preserveModules: true,
-          preserveModulesRoot: "src",
-          sourcemap: true,
+          name: "react-isolator",
           exports: "named",
         },
         plugins: [
@@ -34,7 +31,7 @@ export default (() => {
           cleandir(),
           progress(),
           includePaths({ paths: ["./"] }),
-          resolve({
+          nodeResolve({
             moduleDirectories: ["node_modules"],
           }),
           commonjs(),
@@ -54,15 +51,21 @@ export default (() => {
           filesize(),
           generatePackageJson({
             baseContents: (pkg) => ({
-              name: pkg.name,
               main: "main.js",
               types: "main.d.ts",
+              name: pkg.name,
               version: pkg.version,
               license: pkg.license,
+              description: pkg.description,
+              repository: pkg.repository,
+              keywords: pkg.keywords,
+              bugs: pkg.bugs,
+              contributors: pkg.contributors,
               peerDependencies: pkg.peerDependencies,
-              dependencies: {},
+              dependencies: pkg.dependencies,
+              browser: pkg.browser,
             }),
-          }),
+          })
         ],
       };
 
@@ -75,7 +78,7 @@ export default (() => {
         output: {
           dir: outputDir,
           format: "cjs",
-          name: "react-component-isolator",
+          name: "react-isolator",
           preserveModules: true,
           preserveModulesRoot: "src",
           sourcemap: true,
