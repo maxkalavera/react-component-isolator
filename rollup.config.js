@@ -1,5 +1,4 @@
-
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import progress from "rollup-plugin-progress";
 import commonjs from "rollup-plugin-commonjs";
 import filesize from "rollup-plugin-filesize";
@@ -52,7 +51,7 @@ export default (() => {
           generatePackageJson({
             baseContents: (pkg) => ({
               main: "main.js",
-              types: "main.d.ts",
+              types: "src/main.d.ts",
               name: pkg.name,
               version: pkg.version,
               license: pkg.license,
@@ -65,7 +64,7 @@ export default (() => {
               dependencies: pkg.dependencies,
               browser: pkg.browser,
             }),
-          })
+          }),
         ],
       };
 

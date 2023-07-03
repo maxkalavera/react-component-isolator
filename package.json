@@ -1,6 +1,6 @@
 {
   "name": "react-isolator",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "description": "Generates a web application with a list of React components",
   "license": "MIT",
   "repository": {
