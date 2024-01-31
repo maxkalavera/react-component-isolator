@@ -1,6 +1,6 @@
 # React Component Isolator &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/maxkalavera/react-component-isolator/blob/main/LICENSE.md) [![npm version](https://img.shields.io/badge/npm-^16.8.0-blue.svg)](https://www.npmjs.com/package/)
 
-As the name indicates, this is a tool that allows you to visualized React components in an isolated environment.
+As the name indicates, this is a tool that allows you to visualize React components in an isolated environment.
 
 <p align="center">
   <img src="https://github.com/maxkalavera/react-component-isolator/blob/main/README/screenshot.png" alt="Library running screenshot"/>
@@ -20,7 +20,7 @@ using yarn:
 yarn add --dev react-isolator
 ```
 
-Once the package is installed, you can import the library using `import` or `require` approach:
+Once the package is installed, you can import the library using the `import` or `require` approach:
 
 ```js
 import { ReactIsolator, IsolatedItem } from "react-isolator";
@@ -72,17 +72,17 @@ export default IsolatedButton;
 
 ### ReactIsolator
 
-Main component of the tool, can be conceptualized as a list to visualize every child component.
+The main component of the tool can be conceptualized as a list to visualize every child component.
 
 <br />
 
 ### IsolatedItem
 
-Component that holds the isolated element to visualize.
+The component that holds the isolated element to visualize.
 
 #### Props
 
-- `name`: Label to identify the component in visualizer.
+- `name`: Label to identify the component in the visualizer.
 - `jsxElement`: The component to render.
 
 ## License
