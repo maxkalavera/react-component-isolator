@@ -1,6 +1,6 @@
 # React Component Isolator &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/maxkalavera/react-component-isolator/blob/main/LICENSE.md) [![npm version](https://img.shields.io/badge/npm-^16.8.0-blue.svg)](https://www.npmjs.com/package/)
 
-As the name indicates, this is a tool that allows you to visualize React components in an isolated environment.
+A tool that allows you to visualize React components in an isolated environment.
 
 <p align="center">
   <img src="https://github.com/maxkalavera/react-component-isolator/blob/main/README/screenshot.png" alt="Library running screenshot"/>
